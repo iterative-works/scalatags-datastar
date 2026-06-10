@@ -47,3 +47,9 @@ object TypedAttributesTest extends TestSuite:
 
         test("the string escape hatch still works alongside typed expressions"):
             assert(render(dataText := "$count") == """<div data-text="$count"></div>""")
+
+        test("data-bind binds a signal handle by its bare name, not a $ reference"):
+            // Datastar's data-bind takes the signal *name* (`data-bind="step"`), unlike every other
+            // attribute that takes an expression — so a handle must render its name, not `$step`.
+            assert(render(dataBind := Counter.step) == """<div data-bind="step"></div>""")
+            assert(input(dataBind := Counter.step).render == """<input data-bind="step" />""")

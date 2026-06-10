@@ -112,6 +112,15 @@ final class BindAttr(name: String, mods: Vector[String])
     protected def addMod(mod: String): BindAttr = new BindAttr(name, mods :+ mod)
     def prop: BindAttr = addMod("prop")
     def event: BindAttr = addMod("event")
+
+    /** Two-way binds a typed signal handle by its bare name (`data-bind="step"`). Unlike other
+      * attributes, `data-bind` names a signal rather than taking an expression, so the handle
+      * renders its name, not its `$`-prefixed reference.
+      */
+    def :=[Builder](signal: Signal[?])(using
+        ev: generic.AttrValue[Builder, String]
+    ): generic.AttrPair[Builder, String] =
+        toAttr := signal.name
 end BindAttr
 
 /** `data-on-intersect` — IntersectionObserver trigger with threshold and timing modifiers. */
