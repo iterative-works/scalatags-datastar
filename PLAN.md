@@ -72,9 +72,15 @@ like `scalatags-webawesome`.
 - **Phase 0 — Scaffold & decisions.** ✅ DONE (this commit). Mill build, configs, core
   binding skeleton with colon-notation attributes, passing smoke test, cross-compile
   verified.
-- **Phase 1 — Attribute bindings.** Full `data-*` surface; ergonomic plain/keyed unification
-  and a typed modifier builder (`__debounce`, `__once`, `__window`, …); exhaustive
-  smoke tests on exact wire output. *Independently shippable — the webawesome-parity deliverable.*
+- **Phase 1 — Attribute bindings.** ✅ DONE. Full **standard** `data-*` surface; no-modifier
+  attributes are plain `generic.Attr`, the rest return a typed `DataAttr` subtype exposing only
+  their valid modifiers through a fluent builder (`.debounce(500.millis, leading = true)`, `.once`,
+  `.window`, `.caseKebab`, `.threshold(0.5)`, …), rendered to Datastar's `__mod.arg` wire form.
+  `:=` works directly on the wrapper (no implicit conversion, no feature warnings). Exhaustive
+  wire-format tests. **Pro (paid-tier) attributes deferred** — `data-persist`, `data-scroll-into-view`,
+  `data-view-transition`, `data-query-string`, `data-on-raf`, `data-on-resize`, `data-animate`,
+  `data-match-media`, `data-custom-validity`, `data-replace-url` — several carry unique modifier sets;
+  add as a separate opt-in `DatastarPro` when needed.
 - **Phase 2 — Typed signals + `Expr[A]` DSL.** `Signal[A]`, an expression algebra with Scala
   operator overloading rendering to Datastar expression strings; a `Signals` model deriving
   the initial `data-signals` JSON and typed handles; typed attribute variants.
@@ -91,4 +97,6 @@ like `scalatags-webawesome`.
 
 ## Status
 
-Phase 0 complete. Next: Phase 1 (full attribute surface + typed modifiers).
+Phase 1 complete (full standard attribute surface + typed modifier builder, cross-compiled, all
+tests green). Next: spike Phase 3's Tapir reverse-routing to de-risk the headline feature *before*
+investing in Phase 2's `Expr` DSL.
