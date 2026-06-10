@@ -92,6 +92,18 @@ object Expr:
     extension (self: Expr[String])
         def +(that: Expr[String]): Expr[String] = new Binary("+", 11, self, that)
 
+    /** Lets any Scalatags attribute bind a typed expression, e.g. `dataShow := count > lit(5)`,
+      * rendering the expression string. Covers `Expr` and its subtypes (so a bare `Signal` works),
+      * and resolves on either backend by delegating to that backend's `String` attribute value.
+      * Found automatically via `Expr`'s implicit scope — no import needed.
+      */
+    given exprAttrValue[Builder, E <: Expr[?]](using
+        stringValue: scalatags.generic.AttrValue[Builder, String]
+    ): scalatags.generic.AttrValue[Builder, E] with
+        def apply(builder: Builder, attr: scalatags.generic.Attr, value: E): Unit =
+            stringValue.apply(builder, attr, value.render)
+    end exprAttrValue
+
 end Expr
 
 /** Renders a Scala value as a Datastar/JS literal: numbers bare, booleans bare, strings
