@@ -5,8 +5,13 @@ package works.iterative.scalatags.datastar
 import utest.*
 import scalatags.Text.all.*
 import Datastar.*
+import Expr.*
 
 final case class Counter(count: Int = 0, step: Int = 1) derives Signals
+object Counter extends Signals.Handles[Counter]:
+    val count = signal("count")
+    val step = signal("step")
+
 final case class Inner(baz: Int = 2) derives Signals
 final case class Outer(inner: Inner = Inner(), n: Int = 1) derives Signals
 final case class Search(query: String = "", page: Int = 1) derives Signals
@@ -31,3 +36,18 @@ object SignalsTest extends TestSuite:
               div(dataSignals := Signals.encode(Counter())).render
                   == """<div data-signals="{count: 0, step: 1}"></div>"""
             )
+
+        test("companion handles render as signal references"):
+            assert(Counter.count.render == "$count")
+            assert(Counter.step.render == "$step")
+
+        test("a handle carries the field's type for the Expr DSL"):
+            // `> lit(5)` needs `Numeric`, so this only compiles if `count` is a `Signal[Int]`.
+            assert((Counter.count > lit(5)).render == "$count > 5")
+
+        test("a handle composes into a typed attribute"):
+            assert(div(dataText := Counter.count).render == """<div data-text="$count"></div>""")
+
+        test("a name that is not a field of the model does not compile"):
+            assert(!compiletime.testing.typeChecks("""Counter.signal("nope")"""))
+            assert(compiletime.testing.typeChecks("""Counter.signal("count")"""))

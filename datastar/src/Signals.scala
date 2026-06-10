@@ -3,7 +3,8 @@
 package works.iterative.scalatags.datastar
 
 import scala.deriving.Mirror
-import scala.compiletime.{constValueTuple, erasedValue, summonInline}
+import scala.compiletime.{constValue, constValueTuple, erasedValue, summonInline}
+import scala.compiletime.ops.any.==
 
 /** The initial-value model for a Datastar signal store.
   *
@@ -50,4 +51,45 @@ object Signals:
             end render
         end new
     end derived
+
+    /** Marks a case class's companion as the home for its typed signal handles.
+      *
+      * Mixing `Signals.Handles[A]` into the companion lets it declare handles with [[signal]] —
+      * `val count = signal("count")` — each checked against `A`'s fields at compile time and typed
+      * as `Signal[FieldType]`. Call sites then read a stable member, e.g. `Counter.count`.
+      */
+    trait Handles[A]:
+        /** The field `name` of `A`, as a typed signal handle. Does not compile if `A` has no such
+          * field; the handle's value type is that field's type.
+          */
+        transparent inline def signal[Name <: String & Singleton](name: Name): Signal[?] =
+            fieldSignal[A, Name](name)(using summonInline[Mirror.ProductOf[A]])
+    end Handles
+
+    /** A field of product type `A`, by name, as a typed signal handle (`Signal[FieldType]`),
+      * verified against `A`'s fields at compile time. Backs [[Handles.signal]].
+      */
+    transparent inline def fieldSignal[A, Name <: String & Singleton](name: Name)(using
+        m: Mirror.ProductOf[A]
+    ): Signal[?] =
+        lookup[Name, m.MirroredElemLabels, m.MirroredElemTypes](name)
+
+    /** Walks the field labels and types in step to find `Name`'s type. Public only because an
+      * inline method refers to it, so it must be accessible wherever that method expands.
+      */
+    transparent inline def lookup[
+        Name <: String & Singleton,
+        Labels <: Tuple,
+        Types <: Tuple
+    ](name: Name): Signal[?] =
+        inline erasedValue[Labels] match
+            case _: EmptyTuple =>
+                compiletime.error("Signals: no field named \"" + constValue[Name] + "\"")
+            case _: (label *: labelsTail) =>
+                inline erasedValue[Types] match
+                    case _: (tpe *: typesTail) =>
+                        inline if constValue[label == Name] then Signal[tpe](name)
+                        else lookup[Name, labelsTail, typesTail](name)
+                    case _: EmptyTuple =>
+                        compiletime.error("Signals: field/type arity mismatch")
 end Signals
