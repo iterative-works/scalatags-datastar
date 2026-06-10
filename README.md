@@ -12,11 +12,15 @@ See [PLAN.md](./PLAN.md) for the design and roadmap.
 
 ## Status
 
-Early. The full **standard** `data-*` attribute surface with a typed, fluent modifier builder
-(Phase 1), and the **Tapir endpoint bridge** (Phase 3 core): backend actions reverse-routed from
-typed endpoints, so `@get`/`@post`/… can only reference routes that exist. Both cross-compiled for
-JVM and JS. Signal references and the expression DSL are still plain strings — they land in Phase 2.
-(Datastar Pro attributes are not yet bound.)
+Early, but the three magic-string kinds Datastar drives reactivity from are now typed:
+
+- **Attributes** (Phase 1): the full **standard** `data-*` surface with a typed, fluent modifier builder.
+- **Signals + expressions** (Phase 2): a typed `Expr[A]` DSL, and a case-class signal model
+  (`derives Signals`) that yields the initial `data-signals` JSON plus field-checked typed handles.
+- **Backend endpoints** (Phase 3 core): actions reverse-routed from typed Tapir endpoints, so
+  `@get`/`@post`/… can only reference routes that exist.
+
+All cross-compiled for JVM and JS. (Datastar Pro attributes are not yet bound.)
 
 ```scala
 import scalatags.Text.all.*
@@ -36,6 +40,33 @@ input(dataOn("input").debounce(300.millis).once := "@get('/search')")
 div(dataOnIntersect.once.threshold(0.5) := "@get('/more')")
 // <div data-on-intersect__once__threshold.0.5="@get('/more')"></div>
 ```
+
+### Typed signals and expressions
+
+The signal store is a **case class** — the single source of truth for its shape and initial values.
+`derives Signals` gives the initial `data-signals` JSON; mixing `Signals.Handles` into the companion
+gives field-checked, typed handles that read as stable members.
+
+```scala
+import works.iterative.scalatags.datastar.{Signal, Signals}
+import works.iterative.scalatags.datastar.Expr.*
+
+final case class Counter(count: Int = 0, step: Int = 1) derives Signals
+object Counter extends Signals.Handles[Counter]:
+  val count = signal("count")   // Signal[Int] — "count" checked against Counter at compile time
+  val step  = signal("step")    // signal("nope") would not compile
+
+div(
+  dataSignals := Signals.encode(Counter()),        // data-signals="{count: 0, step: 1}"
+  input(`type` := "number", dataBind := Counter.step),  // data-bind="step" (two-way, bare name)
+  span(dataShow := Counter.count > lit(0),         // data-show="$count &gt; 0" (browser decodes)
+       dataText := Counter.count)                  // data-text="$count"
+)
+```
+
+`Expr` operators render with JavaScript precedence, so `(Counter.count > lit(5)) && !busy` becomes
+`$count > 5 && !$busy` with only the parentheses meaning requires. Equality is `===`/`!==` (Scala
+can't override `==`); numeric operators are gated by `Numeric`.
 
 ### Typed backend actions (Tapir bridge)
 

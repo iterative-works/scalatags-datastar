@@ -81,9 +81,24 @@ like `scalatags-webawesome`.
   `data-view-transition`, `data-query-string`, `data-on-raf`, `data-on-resize`, `data-animate`,
   `data-match-media`, `data-custom-validity`, `data-replace-url` — several carry unique modifier sets;
   add as a separate opt-in `DatastarPro` when needed.
-- **Phase 2 — Typed signals + `Expr[A]` DSL.** `Signal[A]`, an expression algebra with Scala
-  operator overloading rendering to Datastar expression strings; a `Signals` model deriving
-  the initial `data-signals` JSON and typed handles; typed attribute variants.
+- **Phase 2 — Typed signals + `Expr[A]` DSL.** ✅ DONE. `Expr[A]` is the typed counterpart to
+  Datastar's JS expression strings: operators (`&&`/`||`/`unary_!`, `===`/`!==` since Scala can't
+  override `==`, `< <= > >=`, `+ - * / %`, string `+`) build a tree rendered with JS precedence and
+  associativity, inserting only the parentheses meaning requires. `Signal[A]` is a named reference
+  rendering `$name`. Any attribute binds a typed expression via an `AttrValue` over `Expr` subtypes
+  (`dataShow := count > lit(5)`), found through `Expr`'s implicit scope on both backends; the String
+  escape hatch is unaffected. The **signal model is a case class** (`derives Signals`, the
+  single source of truth chosen over standalone declarations): Mirror-derived, it renders the initial
+  `data-signals` object literal (`{count: 0, step: 1}`, nesting for nested models) via a tiny
+  hand-rolled encoder — **no JSON dependency in core**. Typed **handles** come from
+  `Signals.Handles[A]` mixed into the companion (`val count = signal("count")`): a `transparent
+  inline def` looks the name up against the model's fields (no quotes macro), fails to compile on an
+  unknown field, and types the handle `Signal[FieldType]`, so call sites read a stable member
+  (`Counter.count`). `data-bind` binds a handle by its bare name (`data-bind="step"`). The full
+  counter view (signals + expressions + handles + a reverse-routed action) renders end to end.
+  Cross-compiles JVM+JS. *Deferred polish:* per-attribute expected-type constraints (e.g. forcing
+  `dataShow` to `Expr[Boolean]`), `_.count` selector-macro sugar (only if the string form chafes),
+  `dataSignals := model` sugar, typed object-literal maps for `data-class`/`-attr`/`-style`.
 - **Phase 3 — Tapir endpoint bridge.** ✅ Core DONE. `EndpointUrl.urlOf(endpoint): I => String`
   reverse-routes via the sttp client interpreter with no base URI, yielding a relative `/path?query`
   (leading slash guaranteed; query values form-encoded and round-tripping through Tapir's own server
@@ -109,10 +124,13 @@ like `scalatags-webawesome`.
 
 ## Status
 
-Phases 1 and 3-core complete, cross-compiled, all tests green. Phase 1: full standard attribute
-surface + typed modifier builder. Phase 3 core: endpoint reverse-routing (`urlOf`) and typed Datastar
-actions (`action`) derived from Tapir endpoints, composing with `dataOn` end-to-end — the headline
-"endpoints must exist" feature is proven. `action` is total (`I => String`): the verb is derived from
-the endpoint's method, falling back to `@get` for a methodless or non-action endpoint exactly as
-Tapir's own client interpreter does. Next: Phase 2's typed signals + `Expr[A]` DSL, with a typed
-`dataOn := action` binding that consumes the action over typed expressions.
+Phases 1, 2, and 3-core complete, cross-compiled, all tests green. Phase 1: full standard attribute
+surface + typed modifier builder. Phase 2: the `Expr[A]` DSL (precedence-correct JS-expression
+rendering), `Signal[A]`, a case-class `Signals` model deriving the initial `data-signals` JSON
+(macro-free, no JSON dependency) and field-checked typed handles via `Signals.Handles[A]`, and typed
+attribute binding — the full counter view composes end to end. Phase 3 core: endpoint reverse-routing
+(`urlOf`) and typed Datastar actions (`action`) derived from Tapir endpoints, composing with `dataOn`
+end-to-end — the headline "endpoints must exist" feature is proven. `action` is total (`I => String`):
+the verb is derived from the endpoint's method, falling back to `@get` for a methodless or non-action
+endpoint exactly as Tapir's own client interpreter does. Next: Phase 4 (native SSE codec +
+`readSignals`, where the case-class signal model round-trips server-side) or Phase 5 (dogfood app).
