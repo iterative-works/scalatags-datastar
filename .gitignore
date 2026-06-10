@@ -1,0 +1,26 @@
+# Mill build output
+out/
+
+# IDE
+.idea/
+.vscode/
+.bsp/
+.bloop/
+.metals/
+*.iws
+*.ids
+
+# OS
+.DS_Store
+*~
+*.bak
+
+# Secrets
+.envrc.local
+
+# Scala
+*.class
+*.semanticdb
+
+# Playwright MCP
+.playwright-mcp/

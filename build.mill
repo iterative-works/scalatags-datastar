@@ -1,0 +1,65 @@
+//| mvnDeps: ["com.goyeau::mill-scalafix::0.6.0"]
+// PURPOSE: Mill build definition for the scalatags-datastar library.
+// PURPOSE: Provides Scalatags bindings for the Datastar hypermedia framework.
+package build
+
+import mill._, scalalib._, scalajslib._, publish._
+import mill.scalalib.scalafmt.ScalafmtModule
+import com.goyeau.mill.scalafix.ScalafixModule
+
+val scalaV = "3.3.7"
+val scalaJSV = "1.20.2"
+val scalatagsV = "0.13.1"
+
+object datastar extends Module {
+
+  val publishOrg = "works.iterative"
+  val publishVer = "0.1.0-SNAPSHOT"
+
+  val publishPom = PomSettings(
+    description = "Scalatags bindings for the Datastar hypermedia framework",
+    organization = publishOrg,
+    url = "https://github.com/iterative-works/scalatags-datastar",
+    licenses = Seq(License.MIT),
+    versionControl =
+      VersionControl.github("iterative-works", "scalatags-datastar"),
+    developers = Seq(
+      Developer("mph", "Michal Příhoda", "https://github.com/mprihoda")
+    )
+  )
+
+  trait Shared extends ScalaModule with PublishModule with ScalafmtModule with ScalafixModule {
+    def scalaVersion = scalaV
+    def publishVersion = publishVer
+    def pomSettings = publishPom
+    def artifactName = "scalatags-datastar"
+
+    def sharedSources = Task.Sources(moduleDir / os.up / "src")
+
+    override def sources = Task {
+      super.sources() ++ sharedSources()
+    }
+
+    def mvnDeps = Seq(
+      mvn"com.lihaoyi::scalatags::$scalatagsV"
+    )
+  }
+
+  object jvm extends Shared {
+    object test extends ScalaTests with TestModule.Utest {
+      def mvnDeps = Seq(mvn"com.lihaoyi::utest::0.8.5")
+    }
+  }
+
+  object js extends Shared with ScalaJSModule {
+    def scalaJSVersion = scalaJSV
+
+    override def mvnDeps = super.mvnDeps() ++ Seq(
+      mvn"org.scala-js::scalajs-dom::2.8.0"
+    )
+
+    object test extends ScalaJSTests with TestModule.Utest {
+      def mvnDeps = Seq(mvn"com.lihaoyi::utest::0.8.5")
+    }
+  }
+}
