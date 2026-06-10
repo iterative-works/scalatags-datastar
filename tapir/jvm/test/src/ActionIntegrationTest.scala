@@ -18,23 +18,19 @@ object ActionIntegrationTest extends TestSuite:
     val tests = Tests {
 
         test("action wires into data-on and renders verb plus reverse-routed url") {
-            val rendered =
-                action(toggleTodo).map(toggle => button(dataOn("click") := toggle(7L))("Toggle").render)
+            val toggle = action(toggleTodo)
+            val rendered = button(dataOn("click") := toggle(7L))("Toggle").render
             assert(
-                rendered == Some(
-                    """<button data-on:click="@post('/todos/7/toggle')">Toggle</button>"""
-                )
+                rendered == """<button data-on:click="@post('/todos/7/toggle')">Toggle</button>"""
             )
         }
 
         test("action composes with data-on modifiers") {
-            val rendered = action(searchTodos).map(search =>
+            val search = action(searchTodos)
+            val rendered =
                 input(dataOn("input").debounce(300.millis) := search("milk")).render
-            )
             assert(
-                rendered == Some(
-                    """<input data-on:input__debounce.300ms="@get('/todos?q=milk')" />"""
-                )
+                rendered == """<input data-on:input__debounce.300ms="@get('/todos?q=milk')" />"""
             )
         }
     }

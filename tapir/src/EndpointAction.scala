@@ -19,16 +19,20 @@ import sttp.model.Method
   */
 object EndpointAction:
 
-    /** Datastar's expression verb for an HTTP method, defined for the methods Datastar supports as
-      * backend actions (GET/POST/PUT/PATCH/DELETE).
+    /** The Datastar action verb for an endpoint's HTTP method.
+      *
+      * The four mutating verbs map directly. Everything else — GET, an endpoint that fixes no
+      * method, and methods Datastar has no action for (HEAD, OPTIONS, …) — maps to `get`. The
+      * methodless default mirrors Tapir's own client interpreter, which realizes a methodless
+      * endpoint with `method.getOrElse(Method.GET)`; for a non-action method, `get` is the closest
+      * expressible Datastar action.
       */
-    private def verb(method: Method): Option[String] = method.method match
-        case "GET"    => Some("get")
-        case "POST"   => Some("post")
-        case "PUT"    => Some("put")
-        case "PATCH"  => Some("patch")
-        case "DELETE" => Some("delete")
-        case _        => None
+    private def verb(method: Option[Method]): String = method.map(_.method) match
+        case Some("POST")   => "post"
+        case Some("PUT")    => "put"
+        case Some("PATCH")  => "patch"
+        case Some("DELETE") => "delete"
+        case _              => "get"
 
     /** Escapes the reverse-routed URL for embedding in the action's single-quoted string literal.
       *
@@ -41,15 +45,10 @@ object EndpointAction:
     private def escapeUrl(url: String): String =
         url.replace("'", "\\'")
 
-    /** The action-expression builder for an endpoint, e.g. `_ => "@get('/users/42')"`.
-      *
-      * Defined only when the endpoint fixes a Datastar-supported method; `None` otherwise (an
-      * endpoint with no method, or one using a verb Datastar has no action for, such as HEAD).
-      */
-    def action[I](endpoint: PublicEndpoint[I, ?, ?, Any]): Option[I => String] =
-        endpoint.method.flatMap(verb).map { v =>
-            val url = EndpointUrl.urlOf(endpoint)
-            input => s"@$v('${escapeUrl(url(input))}')"
-        }
+    /** The action-expression builder for an endpoint, e.g. `_ => "@get('/users/42')"`. */
+    def action[I](endpoint: PublicEndpoint[I, ?, ?, Any]): I => String =
+        val v = verb(endpoint.method)
+        val url = EndpointUrl.urlOf(endpoint)
+        input => s"@$v('${escapeUrl(url(input))}')"
 
 end EndpointAction

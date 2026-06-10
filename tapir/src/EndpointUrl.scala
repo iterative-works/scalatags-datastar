@@ -4,7 +4,6 @@ package works.iterative.scalatags.datastar.tapir
 
 import sttp.tapir.PublicEndpoint
 import sttp.tapir.client.sttp.SttpClientInterpreter
-import sttp.model.Method
 
 /** Reverse-routing for Datastar backend actions.
   *
@@ -24,11 +23,5 @@ object EndpointUrl:
     def urlOf[I](endpoint: PublicEndpoint[I, ?, ?, Any]): I => String =
         val toRequest = interpreter.toRequest(endpoint, None)
         input => toRequest(input).uri.toString
-
-    /** The HTTP method declared by the endpoint, which selects the Datastar action verb (`@get` /
-      * `@post` / …). Absent if the endpoint fixes no method.
-      */
-    def methodOf(endpoint: PublicEndpoint[?, ?, ?, Any]): Option[Method] =
-        endpoint.method
 
 end EndpointUrl

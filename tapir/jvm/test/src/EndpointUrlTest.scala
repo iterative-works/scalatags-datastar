@@ -4,8 +4,7 @@ package works.iterative.scalatags.datastar.tapir
 
 import utest.*
 import sttp.tapir.*
-import sttp.model.Method
-import EndpointUrl.{urlOf, methodOf}
+import EndpointUrl.urlOf
 
 object EndpointUrlTest extends TestSuite:
 
@@ -83,12 +82,6 @@ object EndpointUrlTest extends TestSuite:
         test("method is independent of url") {
             val ep = endpoint.post.in("save")
             assert(urlOf(ep)(()) == "/save")
-        }
-
-        test("method is recoverable for action-verb selection") {
-            assert(methodOf(endpoint.get.in("x")) == Some(Method.GET))
-            assert(methodOf(endpoint.post.in("x")) == Some(Method.POST))
-            assert(methodOf(endpoint.in("x")) == None)
         }
     }
 
