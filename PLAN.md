@@ -92,12 +92,13 @@ like `scalatags-webawesome`.
   methodless or non-action verb such as HEAD), the URL by reverse-routing. The embedded URL is escaped
   into the single-quoted literal so an apostrophe in a value cannot break out or inject expression
   syntax (every other literal-breaking char is percent-encoded by the router — pinned by test). Wires
-  into `dataOn` end-to-end: `dataOn("click") := action(ep).get(input)` renders
+  into `dataOn` end-to-end: `action(ep).map(go => dataOn("click") := go(input))` renders
   `data-on:click="@post('/todos/7/toggle')"`. Cross-compiles JVM+JS; the published bridge depends on
   tapir only (core dependency is test-scoped). *Headline differentiator.*
-  Remaining for Phase 3 polish: a typed `dataOn(event) := action(ep)` integration that resolves the
-  `Option` ergonomically (lands naturally with Phase 2's typed attribute values), and action `options`
-  (`{contentType, headers}`) if needed.
+  Remaining for Phase 3 polish: a typed `dataOn(event) := action(ep)` integration that consumes the
+  resolved action (the `Option` is resolved once at the application edge — a missing verb fails
+  initialization, never throws; see Phase 2), and action `options` (`{contentType, headers}`) if
+  needed.
 - **Phase 4 — Native SSE SDK.** `patchElements(frag, mode, selector, …)`, `patchSignals(signals)`,
   `readSignals` decoding query/body into the typed model; tapir `streamBody` / http4s SSE.
   Validated against the official conformance test suite.
@@ -111,5 +112,8 @@ like `scalatags-webawesome`.
 Phases 1 and 3-core complete, cross-compiled, all tests green. Phase 1: full standard attribute
 surface + typed modifier builder. Phase 3 core: endpoint reverse-routing (`urlOf`) and typed Datastar
 actions (`action`) derived from Tapir endpoints, composing with `dataOn` end-to-end — the headline
-"endpoints must exist" feature is proven. Next: Phase 2's typed signals + `Expr[A]` DSL, which also
-gives the typed `dataOn := action(ep)` ergonomics that retire the `Option.get` at action sites.
+"endpoints must exist" feature is proven. The verb is derived from the endpoint (Tapir does not put
+the method in the endpoint's type), so `action` is `Option`-typed; the absence is resolved once at the
+application edge as a failed initialization effect, never with a partial `Option` accessor mid-render.
+Next: Phase 2's typed signals + `Expr[A]` DSL, with a typed `dataOn := action` binding that consumes a
+resolved action directly.

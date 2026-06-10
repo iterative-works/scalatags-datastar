@@ -48,14 +48,16 @@ import works.iterative.scalatags.datastar.tapir.EndpointAction.action
 
 val toggleTodo = endpoint.post.in("todos" / path[Long]("id") / "toggle")
 
-val toggle = action(toggleTodo).get          // Long => String, resolved once
-button(dataOn("click") := toggle(7L))("Toggle")
-// <button data-on:click="@post('/todos/7/toggle')">Toggle</button>
+// action derives the verb (POST) and reverse-routes the URL, both from the endpoint.
+action(toggleTodo).map(toggle => button(dataOn("click") := toggle(7L))("Toggle"))
+// Some(<button data-on:click="@post('/todos/7/toggle')">Toggle</button>)
 ```
 
 `action` returns `Option[I => String]` — `None` only when the endpoint fixes no Datastar-supported
-method. The reverse-routed URL is escaped into the action's string literal, so values can't break
-out of the expression.
+method (e.g. a bare endpoint with no verb, or a HEAD route). An application resolves its actions once
+at startup, where a missing verb fails initialization rather than throwing mid-render. The
+reverse-routed URL is escaped into the action's string literal, so values can't break out of the
+expression.
 
 ## Build
 
