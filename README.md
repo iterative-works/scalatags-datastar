@@ -17,8 +17,8 @@ Early, but the three magic-string kinds Datastar drives reactivity from are now 
 - **Attributes** (Phase 1): the full **standard** `data-*` surface with a typed, fluent modifier builder.
 - **Signals + expressions** (Phase 2): a typed `Expr[A]` DSL, and a case-class signal model
   (`derives Signals`) that yields the initial `data-signals` JSON plus field-checked typed handles.
-- **Backend endpoints** (Phase 3 core): actions reverse-routed from typed Tapir endpoints, so
-  `@get`/`@post`/… can only reference routes that exist.
+- **Backend endpoints** (Phase 3): actions reverse-routed from typed Tapir endpoints, so
+  `@get`/`@post`/… can only reference routes that exist, with typed action options.
 
 All cross-compiled for JVM and JS. (Datastar Pro attributes are not yet bound.)
 
@@ -89,6 +89,19 @@ button(dataOn("click") := toggle(7L))("Toggle")
 method (or a non-action method such as HEAD) falls back to `@get`, matching Tapir's own client
 interpreter, which realizes a methodless endpoint as GET. The reverse-routed URL is escaped into the
 action's string literal, so values can't break out of the expression.
+
+Datastar's action **options** are typed via a second argument. `ActionOptions` covers `contentType`
+(JSON by default, or `form` to submit the enclosing form) and request `headers`; only the fields you
+set are rendered, so the default stays a bare `@verb('/url')`.
+
+```scala
+import works.iterative.scalatags.datastar.tapir.ActionOptions
+
+val save = endpoint.post.in("contacts" / path[Long]("id"))
+
+button(dataOn("click") := action(save, ActionOptions.form.withHeader("X-CSRF-Token", token))(42L))("Save")
+// <button data-on:click="@post('/contacts/42', {contentType: 'form', headers: {'X-CSRF-Token': '…'}})">Save</button>
+```
 
 ## Build
 

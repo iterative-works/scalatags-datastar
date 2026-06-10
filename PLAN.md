@@ -99,7 +99,7 @@ like `scalatags-webawesome`.
   Cross-compiles JVM+JS. *Deferred polish:* per-attribute expected-type constraints (e.g. forcing
   `dataShow` to `Expr[Boolean]`), `_.count` selector-macro sugar (only if the string form chafes),
   `dataSignals := model` sugar, typed object-literal maps for `data-class`/`-attr`/`-style`.
-- **Phase 3 — Tapir endpoint bridge.** ✅ Core DONE. `EndpointUrl.urlOf(endpoint): I => String`
+- **Phase 3 — Tapir endpoint bridge.** ✅ DONE. `EndpointUrl.urlOf(endpoint): I => String`
   reverse-routes via the sttp client interpreter with no base URI, yielding a relative `/path?query`
   (leading slash guaranteed; query values form-encoded and round-tripping through Tapir's own server
   decoder). `EndpointAction.action(endpoint): I => String` is total — it derives the Datastar action
@@ -113,7 +113,13 @@ like `scalatags-webawesome`.
   Cross-compiles JVM+JS; the published bridge depends on tapir only (core dependency is test-scoped).
   *Headline differentiator.* The GET fallback is specific to this Tapir-endpoint binding (faithful to
   Tapir); a future non-Tapir action source could choose different verb-resolution logic.
-  Remaining for Phase 3 polish: action `options` (`{contentType, headers}`) if needed.
+  Action **options** are typed too: `action(ep, options)` appends Datastar's options object after the
+  URL — `@post('/save', {contentType: 'form'})`. `ActionOptions` covers `contentType` (a `ContentType`
+  enum → `'json'`/`'form'`) and `headers` (insertion-ordered, keys quoted since header names carry `-`,
+  values escaped). Only set fields render, so the default leaves a bare `@verb('/url')` and every
+  existing call site is unchanged. *Deferred (add as fields when needed):* Datastar's remaining action
+  options — `selector`, `filterSignals`, `openWhenHidden`, the `retry*` family, `payload`,
+  `requestCancellation`.
 - **Phase 4 — Native SSE SDK.** `patchElements(frag, mode, selector, …)`, `patchSignals(signals)`,
   `readSignals` decoding query/body into the typed model; tapir `streamBody` / http4s SSE.
   Validated against the official conformance test suite.
@@ -124,13 +130,14 @@ like `scalatags-webawesome`.
 
 ## Status
 
-Phases 1, 2, and 3-core complete, cross-compiled, all tests green. Phase 1: full standard attribute
+Phases 1, 2, and 3 complete, cross-compiled, all tests green. Phase 1: full standard attribute
 surface + typed modifier builder. Phase 2: the `Expr[A]` DSL (precedence-correct JS-expression
 rendering), `Signal[A]`, a case-class `Signals` model deriving the initial `data-signals` JSON
 (macro-free, no JSON dependency) and field-checked typed handles via `Signals.Handles[A]`, and typed
-attribute binding — the full counter view composes end to end. Phase 3 core: endpoint reverse-routing
+attribute binding — the full counter view composes end to end. Phase 3: endpoint reverse-routing
 (`urlOf`) and typed Datastar actions (`action`) derived from Tapir endpoints, composing with `dataOn`
 end-to-end — the headline "endpoints must exist" feature is proven. `action` is total (`I => String`):
 the verb is derived from the endpoint's method, falling back to `@get` for a methodless or non-action
-endpoint exactly as Tapir's own client interpreter does. Next: Phase 4 (native SSE codec +
+endpoint exactly as Tapir's own client interpreter does; a typed `ActionOptions` (`contentType`,
+`headers`) renders Datastar's action options object when supplied. Next: Phase 4 (native SSE codec +
 `readSignals`, where the case-class signal model round-trips server-side) or Phase 5 (dogfood app).

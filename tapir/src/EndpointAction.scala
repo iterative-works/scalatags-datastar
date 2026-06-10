@@ -45,10 +45,20 @@ object EndpointAction:
     private def escapeUrl(url: String): String =
         url.replace("'", "\\'")
 
-    /** The action-expression builder for an endpoint, e.g. `_ => "@get('/users/42')"`. */
-    def action[I](endpoint: PublicEndpoint[I, ?, ?, Any]): I => String =
+    /** The action-expression builder for an endpoint, e.g. `_ => "@get('/users/42')"`.
+      *
+      * [[options]] appends Datastar's action options object after the URL, e.g. `@post('/save',
+      * {contentType: 'form'})`; the default (no options) leaves a bare `@verb('/url')`.
+      */
+    def action[I](
+        endpoint: PublicEndpoint[I, ?, ?, Any],
+        options: ActionOptions = ActionOptions.empty
+    ): I => String =
         val v = verb(endpoint.method)
         val url = EndpointUrl.urlOf(endpoint)
-        input => s"@$v('${escapeUrl(url(input))}')"
+        val opts = options.render
+        val suffix = if opts.isEmpty then "" else s", $opts"
+        input => s"@$v('${escapeUrl(url(input))}'$suffix)"
+    end action
 
 end EndpointAction
