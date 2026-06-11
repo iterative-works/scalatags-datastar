@@ -148,14 +148,23 @@ below wires them into a tapir `streamTextBody` / http4s `text/event-stream` resp
 ### Example app (`scenarios`, JVM)
 
 A runnable dogfood app on the house stack — ZIO + http4s (Blaze) + Tapir — puts every layer together
-(Phase 5, in progress). The first example is a **server-driven counter**: the page binds a `Counter`
-case class to the signal store and a reverse-routed `@post('/increment')` button; the server decodes
-the round-tripped store with `readSignals`, advances it, and streams a `patch-signals` SSE event built
-by the codec. The signal store rides in the request body — never a typed endpoint input — so the
-template action and the handler share one route definition and cannot drift.
+(Phase 5, in progress). Two examples are mounted side by side:
+
+- **Server-driven counter** (`/`): the page binds a `Counter` case class to the signal store and a
+  reverse-routed `@post('/increment')` button; the server decodes the round-tripped store with
+  `readSignals`, advances it, and streams a `patch-signals` SSE event built by the codec. The signal
+  store rides in the request body — never a typed endpoint input — so the template action and the
+  handler share one route definition and cannot drift.
+- **Live search** (`/search`): a debounced `data-on:input` fires a reverse-routed `@get('/search/results')`;
+  the server decodes the store, filters a catalogue, and streams a `patch-elements` event. One
+  `results(matches)` fragment renders both the initial list and every patch, so they cannot diverge —
+  the symmetry the library is built for. A `@get` action carries the signals in a `datastar` query
+  parameter (not a body), which the server endpoint decodes through the same `readSignals`.
 
 ```bash
-./mill scenarios.run        # then open http://localhost:8080 (set PORT to override)
+./mill scenarios.run        # serves both examples; set PORT to override 8080
+#   http://localhost:8080/         — counter
+#   http://localhost:8080/search   — live search
 ```
 
 ## Build

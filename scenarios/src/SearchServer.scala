@@ -1,0 +1,46 @@
+// PURPOSE: Server logic for the live-search example — page rendering and the SSE search handler.
+// PURPOSE: Decodes the `datastar` query param, filters the catalogue, patches the same results Frag.
+package works.iterative.scalatags.datastar.scenarios
+
+import sttp.tapir.ztapir.*
+import sttp.capabilities.zio.ZioStreams
+import org.http4s.HttpRoutes
+import zio.*
+import zio.stream.ZStream
+import java.nio.charset.StandardCharsets.UTF_8
+import works.iterative.scalatags.datastar.sse.{ServerSentEvents, readSignals}
+
+/** The live-search example, wired to the house server stack.
+  *
+  * The search handler decodes the `datastar` query parameter into the typed `Search` store with
+  * `readSignals`, filters the catalogue, and answers with a `patch-elements` SSE event built from
+  * the very `SearchView.results` fragment the page first rendered — so the patched list and the
+  * initial list are produced by one template. The codec stays the source of the wire bytes.
+  */
+object SearchServer:
+
+    private val pageLogic: ZServerEndpoint[Any, Any] =
+        SearchEndpoints.page.zServerLogic(_ => ZIO.succeed(SearchView.page))
+
+    private val searchLogic: ZServerEndpoint[Any, ZioStreams] =
+        SearchEndpoints.search.zServerLogic: datastar =>
+            readSignals[Search](datastar) match
+                case Right(search) =>
+                    val event = ServerSentEvents.patchElements(
+                        SearchView.results(Languages.matching(search.query))
+                    )
+                    ZIO.succeed(ZStream.fromChunk(Chunk.fromArray(event.getBytes(UTF_8))))
+                case Left(error) =>
+                    ZIO.fail(s"Could not read signals: $error")
+
+    val serverEndpoints: List[ZServerEndpoint[Any, ZioStreams]] =
+        List(pageLogic, searchLogic)
+
+    val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
+        HttpServer.routes(serverEndpoints)
+
+    /** Binds a Blaze server serving just live search to `host`/`port`, scoped. */
+    def serve(port: Int, host: String = "localhost"): RIO[Scope, org.http4s.server.Server] =
+        HttpServer.serve(serverEndpoints, port, host)
+
+end SearchServer

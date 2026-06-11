@@ -157,8 +157,21 @@ like `scalatags-webawesome`.
   domain), integration (in-process http4s routes) and end-to-end (real Blaze on an ephemeral port
   driven by a real sttp client, asserting the response bytes equal the codec output) tests.
   Datastar client pinned to **v1.0.2** — the release whose wire format the codec targets
-  (`patch-*`); npm's "latest" tag still ships the older `merge-*` names. *Remaining:* more canonical
-  examples (live search, todo, click-to-edit, polling, SSE feed), llms.txt, contributing.
+  (`patch-*`); npm's "latest" tag still ships the older `merge-*` names.
+  **Second slice DONE — live search:** `GET /search` renders a page whose debounced `data-on:input`
+  fires a reverse-routed `@get('/search/results')`; the handler decodes the store, filters a
+  catalogue, and streams a `patch-elements` event whose `<ul id="results">` is produced by the very
+  `results(matches)` fragment the page first rendered — one template both directions, the symmetry the
+  library exists for. This slice exercises the *other* transport channel: a `@get` action serialises
+  the signals into a `datastar` **query parameter** (`ot=GET,DELETE` are bodyless in the client), so
+  the server endpoint adds `.in(query[String]("datastar"))` and decodes it through the same
+  `readSignals` — two channels, GET-shaped. Shared plumbing was factored out: `HttpServer` (the
+  Blaze/route boilerplate), `Layout` (the document shell pinning the client version in one place), and
+  `Scenarios` (the composed endpoint set the entrypoint and routing tests share). Composing the two
+  examples surfaced — and a new `ScenariosRoutesTest` now guards — a routing bug: a pathless
+  `endpoint.get` is a catch-all that shadowed `/search`; the counter page is now `endpoint.get.in("")`
+  (root only). *Remaining:* more canonical examples (todo, click-to-edit, polling, SSE feed),
+  llms.txt, contributing.
 - **Phase 6 (optional).** Generate SSE constants/enums from `datastar-sdk-config.json`. Component
   codegen is *not* warranted — the attribute set is small and stable (YAGNI).
 
@@ -178,8 +191,10 @@ endpoint exactly as Tapir's own client interpreter does; a typed `ActionOptions`
 the two Datastar server events to their exact wire format, and `readSignals` decodes the round-tripped
 store into the typed model (the symmetry payoff), validated against the official conformance suite (all
 19 GET + 1 POST golden cases). Phase 5 is underway: the `scenarios` dogfood app (ZIO + http4s/Blaze +
-tapir) now runs a server-driven counter that exercises the typed bindings, the endpoint bridge and the
-SSE codec end to end, wiring the previously deferred SSE transport (`streamTextBody` over
+tapir) now runs two examples — a server-driven counter (POST body → `patch-signals`) and a live search
+(debounced `@get`, signals in the `datastar` query param → `patch-elements`, one fragment rendering
+both the initial list and every patch) — exercising the typed bindings, the endpoint bridge and the SSE
+codec end to end, wiring the previously deferred SSE transport (`streamTextBody` over
 `text/event-stream`) and proving it with unit, in-process integration and real-socket end-to-end tests.
-Next within Phase 5: more canonical examples (live search, todo, click-to-edit, polling, SSE feed) and
-the docs (llms.txt, contributing).
+Next within Phase 5: more canonical examples (todo, click-to-edit, polling, SSE feed) and the docs
+(llms.txt, contributing).

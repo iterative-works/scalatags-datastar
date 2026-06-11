@@ -18,7 +18,7 @@ object CounterEndpoints:
 
     /** Serves the counter page. */
     val page: PublicEndpoint[Unit, Unit, String, Any] =
-        endpoint.get.out(htmlBodyUtf8)
+        endpoint.get.in("").out(htmlBodyUtf8)
 
     /** The route a click hits. Empty input — the signal store is not modelled here; the template
       * action reverse-routes this to `@post('/increment')`.

@@ -15,12 +15,6 @@ import works.iterative.scalatags.datastar.Signals
   */
 object CounterView:
 
-    /** The Datastar client, pinned to the release whose wire format the SSE codec targets
-      * (`datastar-patch-signals`); npm's "latest" tag still ships the older `merge-signals` names.
-      */
-    private val datastarScript =
-        "https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.2/bundles/datastar.js"
-
     /** The click action, reverse-routed from the increment route: `@post('/increment')`. */
     private val incrementAction: String =
         works.iterative.scalatags.datastar.tapir.EndpointAction
@@ -28,26 +22,15 @@ object CounterView:
 
     /** The full page as an HTML string. */
     def page: String =
-        "<!DOCTYPE html>" + html(lang := "en")(
-            head(
-                meta(attr("charset") := "utf-8"),
-                meta(
-                    name := "viewport",
-                    attr("content") := "width=device-width, initial-scale=1"
+        Layout.page("Datastar counter")(
+            div(dataSignals := Signals.encode(Counter()))(
+                h1("Counter"),
+                p(
+                    "Count: ",
+                    span(id := "count", dataText := Counter.count)
                 ),
-                tag("title")("Datastar counter"),
-                script(src := datastarScript, `type` := "module")
-            ),
-            body(
-                div(dataSignals := Signals.encode(Counter()))(
-                    h1("Counter"),
-                    p(
-                        "Count: ",
-                        span(id := "count", dataText := Counter.count)
-                    ),
-                    button(dataOn("click") := incrementAction)("Increment")
-                )
+                button(dataOn("click") := incrementAction)("Increment")
             )
-        ).render
+        )
 
 end CounterView

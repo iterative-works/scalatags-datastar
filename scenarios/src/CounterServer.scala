@@ -3,14 +3,10 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import sttp.tapir.ztapir.*
-import sttp.tapir.server.http4s.ztapir.ZHttp4sServerInterpreter
 import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.implicits.*
 import zio.*
 import zio.stream.ZStream
-import zio.interop.catz.*
 import java.nio.charset.StandardCharsets.UTF_8
 import works.iterative.scalatags.datastar.sse.{ServerSentEvents, readSignals}
 
@@ -39,20 +35,10 @@ object CounterServer:
         List(pageLogic, incrementLogic)
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
-        ZHttp4sServerInterpreter[Any]().from(serverEndpoints).toRoutes
+        HttpServer.routes(serverEndpoints)
 
-    /** Binds a Blaze server to `host`/`port` (use `0` for an ephemeral port), scoped so it shuts
-      * down when the scope closes.
-      */
+    /** Binds a Blaze server serving just the counter to `host`/`port`, scoped. */
     def serve(port: Int, host: String = "localhost"): RIO[Scope, org.http4s.server.Server] =
-        for
-            executor <- ZIO.executor
-            server <- BlazeServerBuilder[[A] =>> RIO[Any, A]]
-                .withExecutionContext(executor.asExecutionContext)
-                .bindHttp(port, host)
-                .withHttpApp(routes.orNotFound)
-                .resource
-                .toScopedZIO
-        yield server
+        HttpServer.serve(serverEndpoints, port, host)
 
 end CounterServer
