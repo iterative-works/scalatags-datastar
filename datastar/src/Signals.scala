@@ -38,8 +38,12 @@ object Signals:
                 summonInline[ExprLiteral[head]].asInstanceOf[ExprLiteral[Any]] :: literalsOf[tail]
 
     inline given derived[A](using m: Mirror.ProductOf[A]): Signals[A] =
-        val labels = labelsOf[m.MirroredElemLabels]
-        val literals = literalsOf[m.MirroredElemTypes]
+        fromFields(labelsOf[m.MirroredElemLabels], literalsOf[m.MirroredElemTypes])
+
+    /** Builds the renderer from a product's field labels and the literal renderer for each field.
+      * Non-inline so the renderer is compiled once here, not duplicated at every `derives` site.
+      */
+    private def fromFields[A](labels: List[String], literals: List[ExprLiteral[Any]]): Signals[A] =
         new Signals[A]:
             def render(value: A): String =
                 val values = value.asInstanceOf[Product].productIterator.toList
@@ -50,7 +54,7 @@ object Signals:
                     .mkString("{", ", ", "}")
             end render
         end new
-    end derived
+    end fromFields
 
     /** Marks a case class's companion as the home for its typed signal handles.
       *
