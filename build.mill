@@ -11,6 +11,7 @@ val scalaV = "3.3.7"
 val scalaJSV = "1.20.2"
 val scalatagsV = "0.13.1"
 val tapirV = "1.13.15"
+val zioJsonV = "0.7.36"
 
 object datastar extends Module {
 
@@ -97,5 +98,23 @@ object tapir extends Module {
     object test extends ScalaJSTests with TestModule.Utest {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::0.8.5")
     }
+  }
+}
+
+// Native server-side SSE codec: patch-elements / patch-signals / readSignals. JVM-only (server
+// concern). Stack-neutral — it produces the SSE wire strings; the HTTP transport lives downstream.
+object sse extends ScalaModule with ScalafmtModule with ScalafixModule {
+  def scalaVersion = scalaV
+
+  def mvnDeps = Seq(
+    mvn"com.lihaoyi::scalatags::$scalatagsV",
+    mvn"dev.zio::zio-json::$zioJsonV"
+  )
+
+  // Test-only dependency on the core bindings, to prove the signal store round-trips: the same
+  // case class that derives `Signals` for the initial value decodes back via `readSignals`.
+  object test extends ScalaTests with TestModule.Utest {
+    def moduleDeps = super.moduleDeps ++ Seq(datastar.jvm)
+    def mvnDeps = Seq(mvn"com.lihaoyi::utest::0.8.5")
   }
 }

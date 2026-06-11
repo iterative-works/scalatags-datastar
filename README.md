@@ -20,7 +20,14 @@ Early, but the three magic-string kinds Datastar drives reactivity from are now 
 - **Backend endpoints** (Phase 3): actions reverse-routed from typed Tapir endpoints, so
   `@get`/`@post`/… can only reference routes that exist, with typed action options.
 
-All cross-compiled for JVM and JS. (Datastar Pro attributes are not yet bound.)
+And the server speaks Datastar's wire protocol back:
+
+- **Server-side SSE** (Phase 4): a native SSE codec (patch-elements / patch-signals / executeScript)
+  validated against the official Datastar conformance suite, plus `readSignals` decoding the
+  round-tripped signal store into the same case class that seeds its initial value.
+
+The binding layer is cross-compiled for JVM and JS; the SSE codec is JVM-only. (Datastar Pro
+attributes are not yet bound.)
 
 ```scala
 import scalatags.Text.all.*
@@ -103,6 +110,41 @@ button(dataOn("click") := action(save, ActionOptions.form.withHeader("X-CSRF-Tok
 // <button data-on:click="@post('/contacts/42', {contentType: 'form', headers: {'X-CSRF-Token': '…'}})">Save</button>
 ```
 
+### Server-side SSE (`scalatags-datastar-sse`, JVM)
+
+The server answers actions by streaming Datastar SSE events that patch with the *same* Scalatags
+fragments and the *same* signal case class. The codec renders each event to its exact wire format and
+is validated against Datastar's official SDK conformance suite.
+
+```scala
+import works.iterative.scalatags.datastar.sse.*
+import works.iterative.scalatags.datastar.Signals
+import scalatags.Text.all.*
+import zio.json.*
+
+// One case class is the store on both sides of the wire.
+final case class Counter(count: Int = 0, step: Int = 1) derives Signals, JsonEncoder, JsonDecoder
+
+// Patch HTML into the DOM — the Frag is rendered and split across data lines.
+ServerSentEvents.patchElements(div(id := "count")("5"), selector = Some("#count"), mode = ElementPatchMode.Inner)
+// event: datastar-patch-elements
+// data: selector #count
+// data: mode inner
+// data: elements <div id="count">5</div>
+
+// Patch the signal store — the typed model is serialized to compact JSON.
+ServerSentEvents.patchSignals(Counter(5, 1))
+// event: datastar-patch-signals
+// data: signals {"count":5,"step":1}
+
+// Decode the store Datastar round-trips back to the server.
+readSignals[Counter]("""{"count":5,"step":1}""")   // Right(Counter(5, 1))
+```
+
+Only non-default options emit data lines, so a bare `patchElements(frag)` is just `event:` +
+`data: elements …`. The codec is stack-neutral — it produces the SSE strings; wiring them into a
+tapir `streamBody` / http4s SSE response lands with the dogfood app (Phase 5).
+
 ## Build
 
 Mill 1.1.2, Scala 3.3.7.
@@ -110,6 +152,7 @@ Mill 1.1.2, Scala 3.3.7.
 ```bash
 ./mill datastar.jvm.test       # core binding tests
 ./mill tapir.jvm.test          # endpoint bridge tests
+./mill sse.test                # server SSE codec + conformance suite
 ./mill __.compile              # cross-compile check (JVM + JS)
 ./mill __.reformat             # format
 ```

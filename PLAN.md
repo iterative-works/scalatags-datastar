@@ -120,9 +120,25 @@ like `scalatags-webawesome`.
   existing call site is unchanged. *Deferred (add as fields when needed):* Datastar's remaining action
   options — `selector`, `filterSignals`, `openWhenHidden`, the `retry*` family, `payload`,
   `requestCancellation`.
-- **Phase 4 — Native SSE SDK.** `patchElements(frag, mode, selector, …)`, `patchSignals(signals)`,
-  `readSignals` decoding query/body into the typed model; tapir `streamBody` / http4s SSE.
-  Validated against the official conformance test suite.
+- **Phase 4 — Native SSE SDK.** ✅ DONE. A JVM-only `sse` module (scalatags + zio-json, no other
+  deps) renders the two Datastar server events to their exact wire format. `ServerSentEvents`:
+  `patchElements(frag, selector, mode, useViewTransition, namespace, …)` renders a Scalatags `Frag`
+  and splits it across `data: elements` lines; `patchSignals(model)` serializes a typed model to
+  compact JSON via zio-json (with `patchSignalsRaw` for pre-serialized JSON); `executeScript(js, …)`
+  appends a `<script>` to `<body>`. Each renders one event ending in the SSE-terminating blank line;
+  concatenating gives a multi-event response. Only non-default options emit data lines (a bare
+  `patchElements(frag)` is just `event:` + `data: elements …`), and `retry` is emitted only when it
+  differs from Datastar's 1000ms default — matching the reference SDKs. `readSignals[A](json)`
+  decodes the round-tripped store into the typed model `A` (the same case class that `derives Signals`
+  for the initial value also `derives JsonDecoder` here — the symmetry payoff, pinned by a round-trip
+  test). **Validated against the official conformance suite:** the upstream golden `input.json`/
+  `output.txt` cases are vendored into the test resources and driven through the codec, compared with
+  the *same* semantics as the upstream Go runner (events matched; `event`/`id`/`retry` compared by
+  value; `data:` lines grouped by leading key so unlike-line order is insignificant) — all 19 GET and
+  1 POST cases pass. *Transport deferred to Phase 5:* the codec is stack-neutral (it produces the SSE
+  strings); wiring them into tapir `streamBody` / http4s SSE inherently couples to a concrete
+  stream/server stack and can only be end-to-end tested with a running server, so it lands with the
+  dogfood app where that stack exists.
 - **Phase 5 — Dogfood app + docs.** Canonical Datastar examples (live search, todo,
   click-to-edit, polling, SSE feed) on tapir+http4s+ZIO+Scalatags. README, llms.txt, contributing.
 - **Phase 6 (optional).** Generate SSE constants/enums from `datastar-sdk-config.json`. Component
@@ -130,7 +146,7 @@ like `scalatags-webawesome`.
 
 ## Status
 
-Phases 1, 2, and 3 complete, cross-compiled, all tests green. Phase 1: full standard attribute
+Phases 1–4 complete, all tests green (JVM + JS where applicable). Phase 1: full standard attribute
 surface + typed modifier builder. Phase 2: the `Expr[A]` DSL (precedence-correct JS-expression
 rendering), `Signal[A]`, a case-class `Signals` model deriving the initial `data-signals` JSON
 (macro-free, no JSON dependency) and field-checked typed handles via `Signals.Handles[A]`, and typed
@@ -139,5 +155,10 @@ attribute binding — the full counter view composes end to end. Phase 3: endpoi
 end-to-end — the headline "endpoints must exist" feature is proven. `action` is total (`I => String`):
 the verb is derived from the endpoint's method, falling back to `@get` for a methodless or non-action
 endpoint exactly as Tapir's own client interpreter does; a typed `ActionOptions` (`contentType`,
-`headers`) renders Datastar's action options object when supplied. Next: Phase 4 (native SSE codec +
-`readSignals`, where the case-class signal model round-trips server-side) or Phase 5 (dogfood app).
+`headers`) renders Datastar's action options object when supplied. Phase 4: the JVM-only `sse` module
+(scalatags + zio-json) — `ServerSentEvents` (patch-elements / patch-signals / executeScript) renders
+the two Datastar server events to their exact wire format, and `readSignals` decodes the round-tripped
+store into the typed model (the symmetry payoff), validated against the official conformance suite (all
+19 GET + 1 POST golden cases). The SSE transport (tapir `streamBody` / http4s) is deferred to Phase 5,
+where a running server can wire and end-to-end test it. Next: Phase 5 (dogfood app on
+tapir+http4s+ZIO, which also wires the SSE transport).
