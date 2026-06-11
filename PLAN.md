@@ -139,8 +139,26 @@ like `scalatags-webawesome`.
   strings); wiring them into tapir `streamBody` / http4s SSE inherently couples to a concrete
   stream/server stack and can only be end-to-end tested with a running server, so it lands with the
   dogfood app where that stack exists.
-- **Phase 5 — Dogfood app + docs.** Canonical Datastar examples (live search, todo,
-  click-to-edit, polling, SSE feed) on tapir+http4s+ZIO+Scalatags. README, llms.txt, contributing.
+- **Phase 5 — Dogfood app + docs.** 🚧 IN PROGRESS. A `scenarios` app on the house server stack —
+  ZIO + http4s (Blaze) + tapir's `ZHttp4sServerInterpreter` — dogfoods every layer of the library
+  together and, finally, wires the deferred SSE transport.
+  **First slice DONE — the server-driven counter:** `GET /` renders a Scalatags page whose typed
+  bindings come straight from the library (initial store from `Counter derives Signals` →
+  `data-signals`, a typed signal reference → `data-text="$count"`, and a button whose
+  `@post('/increment')` action is reverse-routed from a Tapir endpoint). A click sends the whole
+  signal store as the request body; the handler decodes it with `readSignals[Counter]`, advances it,
+  and answers with a `patch-signals` SSE event built by the Phase-4 codec — streamed back as
+  `text/event-stream`. The codec stays the single source of the wire bytes; tapir's
+  `streamTextBody(ZioStreams)(TextEventStream)` only carries the string it produced. Faithful to the
+  **two-channels** design: the signal store is never a typed tapir input. The template action
+  reverse-routes a parent route endpoint (`endpoint.post.in("increment")`, empty input); the server
+  endpoint is *built from that same route* by adding the raw body and the SSE output, so the URL the
+  browser calls and the handler that answers it cannot drift. Validated by unit (page render +
+  domain), integration (in-process http4s routes) and end-to-end (real Blaze on an ephemeral port
+  driven by a real sttp client, asserting the response bytes equal the codec output) tests.
+  Datastar client pinned to **v1.0.2** — the release whose wire format the codec targets
+  (`patch-*`); npm's "latest" tag still ships the older `merge-*` names. *Remaining:* more canonical
+  examples (live search, todo, click-to-edit, polling, SSE feed), llms.txt, contributing.
 - **Phase 6 (optional).** Generate SSE constants/enums from `datastar-sdk-config.json`. Component
   codegen is *not* warranted — the attribute set is small and stable (YAGNI).
 
@@ -159,6 +177,9 @@ endpoint exactly as Tapir's own client interpreter does; a typed `ActionOptions`
 (scalatags + zio-json) — `ServerSentEvents` (patch-elements / patch-signals / executeScript) renders
 the two Datastar server events to their exact wire format, and `readSignals` decodes the round-tripped
 store into the typed model (the symmetry payoff), validated against the official conformance suite (all
-19 GET + 1 POST golden cases). The SSE transport (tapir `streamBody` / http4s) is deferred to Phase 5,
-where a running server can wire and end-to-end test it. Next: Phase 5 (dogfood app on
-tapir+http4s+ZIO, which also wires the SSE transport).
+19 GET + 1 POST golden cases). Phase 5 is underway: the `scenarios` dogfood app (ZIO + http4s/Blaze +
+tapir) now runs a server-driven counter that exercises the typed bindings, the endpoint bridge and the
+SSE codec end to end, wiring the previously deferred SSE transport (`streamTextBody` over
+`text/event-stream`) and proving it with unit, in-process integration and real-socket end-to-end tests.
+Next within Phase 5: more canonical examples (live search, todo, click-to-edit, polling, SSE feed) and
+the docs (llms.txt, contributing).

@@ -1,0 +1,39 @@
+// PURPOSE: Tapir endpoints for the counter example — the page, and the increment action.
+// PURPOSE: The signal store is never a typed input; it rides in the request body (two channels).
+package works.iterative.scalatags.datastar.scenarios
+
+import sttp.tapir.*
+import sttp.capabilities.zio.ZioStreams
+import zio.stream.Stream
+
+/** The counter example's routes.
+  *
+  * Two channels, as the design demands: an endpoint's typed input models only explicit URL params,
+  * while Datastar appends the whole signal store separately. So [[incrementRoute]] has an empty
+  * input and is what the template's `@post(...)` action reverse-routes; [[increment]] is its server
+  * realization, built from the same route by adding the raw signal body and the SSE output, so the
+  * URL the browser calls and the handler that answers it cannot drift apart.
+  */
+object CounterEndpoints:
+
+    /** Serves the counter page. */
+    val page: PublicEndpoint[Unit, Unit, String, Any] =
+        endpoint.get.out(htmlBodyUtf8)
+
+    /** The route a click hits. Empty input — the signal store is not modelled here; the template
+      * action reverse-routes this to `@post('/increment')`.
+      */
+    val incrementRoute: PublicEndpoint[Unit, Unit, Unit, Any] =
+        endpoint.post.in("increment")
+
+    /** The server endpoint: the round-tripped signal store arrives as the JSON request body, and
+      * the response streams Datastar SSE events as `text/event-stream`. A body that does not decode
+      * into the signal model is a client error (`400`).
+      */
+    val increment: PublicEndpoint[String, String, Stream[Throwable, Byte], ZioStreams] =
+        incrementRoute
+            .in(stringJsonBody)
+            .errorOut(stringBody)
+            .out(streamTextBody(ZioStreams)(CodecFormat.TextEventStream()))
+
+end CounterEndpoints

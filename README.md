@@ -142,8 +142,21 @@ readSignals[Counter]("""{"count":5,"step":1}""")   // Right(Counter(5, 1))
 ```
 
 Only non-default options emit data lines, so a bare `patchElements(frag)` is just `event:` +
-`data: elements …`. The codec is stack-neutral — it produces the SSE strings; wiring them into a
-tapir `streamBody` / http4s SSE response lands with the dogfood app (Phase 5).
+`data: elements …`. The codec is stack-neutral — it produces the SSE strings; the `scenarios` app
+below wires them into a tapir `streamTextBody` / http4s `text/event-stream` response.
+
+### Example app (`scenarios`, JVM)
+
+A runnable dogfood app on the house stack — ZIO + http4s (Blaze) + Tapir — puts every layer together
+(Phase 5, in progress). The first example is a **server-driven counter**: the page binds a `Counter`
+case class to the signal store and a reverse-routed `@post('/increment')` button; the server decodes
+the round-tripped store with `readSignals`, advances it, and streams a `patch-signals` SSE event built
+by the codec. The signal store rides in the request body — never a typed endpoint input — so the
+template action and the handler share one route definition and cannot drift.
+
+```bash
+./mill scenarios.run        # then open http://localhost:8080 (set PORT to override)
+```
 
 ## Build
 
@@ -153,6 +166,7 @@ Mill 1.1.2, Scala 3.3.8 (LTS).
 ./mill datastar.jvm.test       # core binding tests
 ./mill tapir.jvm.test          # endpoint bridge tests
 ./mill sse.test                # server SSE codec + conformance suite
+./mill scenarios.test          # dogfood app: unit + integration + end-to-end
 ./mill __.compile              # cross-compile check (JVM + JS)
 ./mill __.reformat             # format
 ```

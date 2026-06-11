@@ -14,6 +14,10 @@ val scalaJsDomV = "2.8.1"
 val tapirV = "1.13.20"
 val zioJsonV = "0.9.2"
 val utestV = "0.9.5"
+val zioV = "2.1.26"
+val zioInteropCatsV = "23.1.0.13"
+val http4sBlazeV = "0.23.17"
+val sttpClientV = "3.11.0"
 
 object datastar extends Module {
 
@@ -118,5 +122,34 @@ object sse extends ScalaModule with ScalafmtModule with ScalafixModule {
   object test extends ScalaTests with TestModule.Utest {
     def moduleDeps = super.moduleDeps ++ Seq(datastar.jvm)
     def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
+  }
+}
+
+// Phase 5 dogfood app: canonical Datastar examples on the house stack (tapir + http4s + ZIO),
+// proving the typed bindings, the endpoint bridge and the SSE codec compose end to end. JVM-only.
+object scenarios extends ScalaModule with ScalafmtModule with ScalafixModule {
+  def scalaVersion = scalaV
+
+  def moduleDeps = Seq(datastar.jvm, tapir.jvm, sse)
+
+  def mvnDeps = Seq(
+    mvn"dev.zio::zio::$zioV",
+    mvn"dev.zio::zio-streams::$zioV",
+    mvn"dev.zio::zio-interop-cats::$zioInteropCatsV",
+    mvn"com.softwaremill.sttp.tapir::tapir-zio::$tapirV",
+    mvn"com.softwaremill.sttp.tapir::tapir-http4s-server-zio::$tapirV",
+    mvn"org.http4s::http4s-blaze-server::$http4sBlazeV",
+    // The app logs through ZIO; silence http4s's slf4j backend-not-found warning.
+    mvn"org.slf4j:slf4j-nop:1.7.36"
+  )
+
+  def mainClass = Some("works.iterative.scalatags.datastar.scenarios.Server")
+
+  // Real end-to-end HTTP test: boots the server and drives it with a real sttp client request.
+  object test extends ScalaTests with TestModule.Utest {
+    def mvnDeps = Seq(
+      mvn"com.lihaoyi::utest::$utestV",
+      mvn"com.softwaremill.sttp.client3::core::$sttpClientV"
+    )
   }
 }
