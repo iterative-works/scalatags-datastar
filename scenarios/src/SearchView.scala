@@ -1,4 +1,4 @@
-// PURPOSE: The live-search page template — a debounced bound input and a reusable results fragment.
+// PURPOSE: The live-search widget — a debounced bound input and a reusable results fragment.
 // PURPOSE: The same `results` Frag renders the initial list and every SSE patch, in one template.
 package works.iterative.scalatags.datastar.scenarios
 
@@ -7,7 +7,7 @@ import scala.concurrent.duration.*
 import works.iterative.scalatags.datastar.Datastar.*
 import works.iterative.scalatags.datastar.Signals
 
-/** Renders the live-search page.
+/** The live-search example's live fragment.
   *
   * The input two-way binds to the `query` signal (`data-bind="query"`) and, on a debounced
   * keystroke, fires the reverse-routed search action (`@get('/search/results')`). The crucial piece
@@ -21,6 +21,7 @@ object SearchView:
         works.iterative.scalatags.datastar.tapir.EndpointAction
             .action(SearchEndpoints.searchRoute)(())
 
+    // snippet: search-view
     /** The result list. Carries the `results` id so a default `patch-elements` event replaces it by
       * id; an empty match set keeps the element (and id) and shows a message instead.
       */
@@ -31,19 +32,19 @@ object SearchView:
         ul(id := "results")(items)
     end results
 
-    /** The full page as an HTML string, seeded with the whole catalogue. */
-    def page: String =
-        Layout.page("Datastar live search")(
-            div(dataSignals := Signals.encode(Search()))(
-                h1("Live search"),
-                input(
-                    `type` := "search",
-                    placeholder := "Filter languages…",
-                    dataBind := Search.query,
-                    dataOn("input").debounce(300.millis) := searchAction
-                ),
-                results(Languages.all)
-            )
+    /** The interactive search: an input two-way bound to the `query` signal that fires a debounced,
+      * reverse-routed `@get` action, over the catalogue rendered by [[results]].
+      */
+    val demo: Frag =
+        div(dataSignals := Signals.encode(Search()))(
+            input(
+                `type` := "search",
+                placeholder := "Filter languages…",
+                dataBind := Search.query,
+                dataOn("input").debounce(300.millis) := searchAction
+            ),
+            results(Languages.all)
         )
+    // snippet-end
 
 end SearchView

@@ -1,5 +1,5 @@
-// PURPOSE: Integration test for the composed app — every example must route to its own page.
-// PURPOSE: Guards against one example's endpoint shadowing another when all are mounted together.
+// PURPOSE: Integration test for the composed app — the gallery pages and every example's action.
+// PURPOSE: Guards against one endpoint shadowing another, and proves source is read through a route.
 package works.iterative.scalatags.datastar.scenarios
 
 import utest.*
@@ -24,29 +24,43 @@ object ScenariosRoutesTest extends TestSuite:
 
     val tests = Tests:
 
-        test("GET / serves the counter page"):
+        test("GET / serves the gallery home listing every demo"):
             val (response, body) = call(Request[F](Method.GET, uri"/"))
             assert(response.status.code == 200)
-            assert(body.contains("""data-on:click="@post('/increment')""""))
+            assert(body.contains("""href="/examples/counter""""))
+            assert(body.contains("""href="/examples/search""""))
 
-        test("GET /search serves the live-search page, not the counter"):
-            val (response, body) = call(Request[F](Method.GET, uri"/search"))
+        test("GET /examples/counter serves the counter demo beside its source"):
+            val (response, body) = call(Request[F](Method.GET, uri"/examples/counter"))
+            assert(response.status.code == 200)
+            // the live widget...
+            assert(body.contains("""data-on:click="@post('/increment')""""))
+            // ...and its source, read from the classpath and marked for the highlighter
+            assert(body.contains("""class="language-scala""""))
+            assert(body.contains("final case class Counter"))
+
+        test("GET /examples/search serves the live-search demo, not the counter"):
+            val (response, body) = call(Request[F](Method.GET, uri"/examples/search"))
             assert(response.status.code == 200)
             assert(body.contains("""data-bind="query""""))
             assert(!body.contains("""@post('/increment')"""))
 
-        test("GET /search/results serves the search action, not the counter page"):
-            val request = Request[F](
-                Method.GET,
-                uri"/search/results".withQueryParam("datastar", """{"query":"go"}""")
-            )
-            val (response, body) = call(request)
-            assert(response.status.code == 200)
-            assert(response.contentType.exists(_.mediaType == MediaType.`text/event-stream`))
+        test("GET /examples/{unknown} is a 404"):
+            val (response, _) = call(Request[F](Method.GET, uri"/examples/nope"))
+            assert(response.status.code == 404)
 
         test("POST /increment serves the counter action"):
             val request = Request[F](Method.POST, uri"/increment")
                 .withEntity("""{"count":0,"step":1}""")
+            val (response, _) = call(request)
+            assert(response.status.code == 200)
+            assert(response.contentType.exists(_.mediaType == MediaType.`text/event-stream`))
+
+        test("GET /search/results serves the search action"):
+            val request = Request[F](
+                Method.GET,
+                uri"/search/results".withQueryParam("datastar", """{"query":"go"}""")
+            )
             val (response, _) = call(request)
             assert(response.status.code == 200)
             assert(response.contentType.exists(_.mediaType == MediaType.`text/event-stream`))

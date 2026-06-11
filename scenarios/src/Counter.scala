@@ -13,6 +13,7 @@ import zio.json.{JsonDecoder, JsonEncoder}
   * companion mixes in [[Signals.Handles]] so templates reference fields as typed handles
   * (`Counter.count`).
   */
+// snippet: counter-store
 final case class Counter(count: Int = 0, step: Int = 1) derives Signals, JsonEncoder, JsonDecoder:
     /** The store after one click: `count` advances by `step`. */
     def incremented: Counter = copy(count = count + step)
@@ -22,3 +23,4 @@ object Counter extends Signals.Handles[Counter]:
     val count = signal("count")
     val step = signal("step")
 end Counter
+// snippet-end

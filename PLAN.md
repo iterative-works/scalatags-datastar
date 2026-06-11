@@ -170,8 +170,22 @@ like `scalatags-webawesome`.
   `Scenarios` (the composed endpoint set the entrypoint and routing tests share). Composing the two
   examples surfaced — and a new `ScenariosRoutesTest` now guards — a routing bug: a pathless
   `endpoint.get` is a catch-all that shadowed `/search`; the counter page is now `endpoint.get.in("")`
-  (root only). *Remaining:* more canonical examples (todo, click-to-edit, polling, SSE feed),
-  llms.txt, contributing.
+  (root only).
+  **Third slice DONE — examples gallery:** the two standalone pages became a sidebar-navigated gallery
+  modelled on data-star.dev/examples — each demo runs *beside the typed Scala that produces it*. The
+  source panels are read at runtime from the files that compiled (the `scenarios` `src` tree rides on
+  the classpath via an overridden `resources`), delimited by `// snippet:` regions so an excerpt can
+  never drift from the code that runs; `Sources.extract` is pure (region slice + dedent) with
+  classpath loading the only effect. A `Demo` registry (id, blurb, live widget, snippet refs) drives
+  both the sidebar and the routes — a new example is one entry. Pages live under the gallery
+  (`GET /` home, `GET /examples/{id}`, unknown slug → 404); each view now exposes a `demo: Frag`
+  widget the chrome embeds, while the action endpoints (`POST /increment`, `GET /search/results`) are
+  untouched — reverse-routed, they work wherever the widget is mounted. Source is highlighted
+  client-side by a pinned highlight.js (**11.11.1**) + Scala grammar, the second deliberately-pinned
+  CDN asset beside the Datastar client. Validated by unit (`SourcesTest` region/dedent, `GalleryViewTest`
+  chrome), integration (`ScenariosRoutesTest` proves source is read *through* a route) and end-to-end
+  (`GalleryE2ETest`) tests. *Remaining:* more canonical examples (todo, click-to-edit, polling, SSE
+  feed), llms.txt, contributing.
 - **Phase 6 (optional).** Generate SSE constants/enums from `datastar-sdk-config.json`. Component
   codegen is *not* warranted — the attribute set is small and stable (YAGNI).
 
@@ -191,10 +205,12 @@ endpoint exactly as Tapir's own client interpreter does; a typed `ActionOptions`
 the two Datastar server events to their exact wire format, and `readSignals` decodes the round-tripped
 store into the typed model (the symmetry payoff), validated against the official conformance suite (all
 19 GET + 1 POST golden cases). Phase 5 is underway: the `scenarios` dogfood app (ZIO + http4s/Blaze +
-tapir) now runs two examples — a server-driven counter (POST body → `patch-signals`) and a live search
-(debounced `@get`, signals in the `datastar` query param → `patch-elements`, one fragment rendering
-both the initial list and every patch) — exercising the typed bindings, the endpoint bridge and the SSE
-codec end to end, wiring the previously deferred SSE transport (`streamTextBody` over
-`text/event-stream`) and proving it with unit, in-process integration and real-socket end-to-end tests.
+tapir) now presents its examples as a sidebar **gallery** (each demo shown beside the classpath-read
+source that produces it, highlighted client-side): a server-driven counter (POST body →
+`patch-signals`) and a live search (debounced `@get`, signals in the `datastar` query param →
+`patch-elements`, one fragment rendering both the initial list and every patch) — exercising the typed
+bindings, the endpoint bridge and the SSE codec end to end, wiring the previously deferred SSE transport
+(`streamTextBody` over `text/event-stream`) and proving it with unit, in-process integration and
+real-socket end-to-end tests.
 Next within Phase 5: more canonical examples (todo, click-to-edit, polling, SSE feed) and the docs
 (llms.txt, contributing).

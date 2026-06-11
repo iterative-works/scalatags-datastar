@@ -1,4 +1,4 @@
-// PURPOSE: Tapir endpoints for the counter example — the page, and the increment action.
+// PURPOSE: Tapir endpoints for the counter example — the reverse-routed action and its server form.
 // PURPOSE: The signal store is never a typed input; it rides in the request body (two channels).
 package works.iterative.scalatags.datastar.scenarios
 
@@ -6,7 +6,7 @@ import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
 import zio.stream.Stream
 
-/** The counter example's routes.
+/** The counter example's action route.
   *
   * Two channels, as the design demands: an endpoint's typed input models only explicit URL params,
   * while Datastar appends the whole signal store separately. So [[incrementRoute]] has an empty
@@ -16,10 +16,7 @@ import zio.stream.Stream
   */
 object CounterEndpoints:
 
-    /** Serves the counter page. */
-    val page: PublicEndpoint[Unit, Unit, String, Any] =
-        endpoint.get.in("").out(htmlBodyUtf8)
-
+    // snippet: counter-endpoints
     /** The route a click hits. Empty input — the signal store is not modelled here; the template
       * action reverse-routes this to `@post('/increment')`.
       */
@@ -35,5 +32,6 @@ object CounterEndpoints:
             .in(stringJsonBody)
             .errorOut(stringBody)
             .out(streamTextBody(ZioStreams)(CodecFormat.TextEventStream()))
+    // snippet-end
 
 end CounterEndpoints

@@ -27,11 +27,6 @@ object CounterRoutesTest extends TestSuite:
 
     val tests = Tests:
 
-        test("GET / returns the rendered counter page"):
-            val (response, body) = call(Request[F](Method.GET, uri"/"))
-            assert(response.status.code == 200)
-            assert(body.contains("""data-on:click="@post('/increment')""""))
-
         test("POST /increment streams the patch-signals event for the advanced store"):
             val request = Request[F](Method.POST, uri"/increment")
                 .withEntity("""{"count":5,"step":1}""")

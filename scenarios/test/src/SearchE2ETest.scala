@@ -40,16 +40,6 @@ object SearchE2ETest extends TestSuite:
 
     val tests = Tests:
 
-        test("GET /search serves the live-search page as HTML"):
-            withServer: (port, backend) =>
-                val response = basicRequest
-                    .get(uri"http://localhost:$port/search")
-                    .response(asStringAlways)
-                    .send(backend)
-                assert(response.code.code == 200)
-                assert(response.contentType.exists(_.contains("text/html")))
-                assert(response.body.contains("""data-on:input__debounce.300ms="@get('/search/results')""""))
-
         test("GET /search/results decodes the store, filters, and streams a patch-elements event"):
             withServer: (port, backend) =>
                 val response = search(port, backend, """{"query":"sca"}""")

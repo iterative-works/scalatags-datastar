@@ -33,16 +33,6 @@ object CounterE2ETest extends TestSuite:
 
     val tests = Tests:
 
-        test("GET / serves the counter page as HTML"):
-            withServer: (port, backend) =>
-                val response = basicRequest
-                    .get(uri"http://localhost:$port/")
-                    .response(asStringAlways)
-                    .send(backend)
-                assert(response.code.code == 200)
-                assert(response.contentType.exists(_.contains("text/html")))
-                assert(response.body.contains("""data-on:click="@post('/increment')""""))
-
         test("POST /increment decodes the store, increments, and streams a patch-signals event"):
             withServer: (port, backend) =>
                 val response = basicRequest

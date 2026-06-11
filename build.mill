@@ -132,6 +132,12 @@ object scenarios extends ScalaModule with ScalafmtModule with ScalafixModule {
 
   def moduleDeps = Seq(datastar.jvm, tapir.jvm, sse)
 
+  // The gallery shows each example's source beside its live demo. Putting the source tree on the
+  // classpath lets the app read its own `.scala` files at runtime (and in tests), so a displayed
+  // snippet is always the code that actually compiled — it can never drift.
+  def snippetSources = Task.Sources(moduleDir / "src")
+  override def resources = Task { super.resources() ++ snippetSources() }
+
   def mvnDeps = Seq(
     mvn"dev.zio::zio::$zioV",
     mvn"dev.zio::zio-streams::$zioV",

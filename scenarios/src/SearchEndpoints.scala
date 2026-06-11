@@ -1,4 +1,4 @@
-// PURPOSE: Tapir endpoints for the live-search example — the page, and the GET search action.
+// PURPOSE: Tapir endpoints for the live-search example — the GET search action and its server form.
 // PURPOSE: A GET action carries the signal store in the `datastar` query param, not a request body.
 package works.iterative.scalatags.datastar.scenarios
 
@@ -6,7 +6,7 @@ import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
 import zio.stream.Stream
 
-/** The live-search example's routes.
+/** The live-search example's action route.
   *
   * Two channels again, but a `@get` action transports the signal store differently than a `@post`
   * one: the Datastar client serialises the signals into a `datastar` query parameter rather than a
@@ -16,10 +16,7 @@ import zio.stream.Stream
   */
 object SearchEndpoints:
 
-    /** Serves the live-search page at `/search`. */
-    val page: PublicEndpoint[Unit, Unit, String, Any] =
-        endpoint.get.in("search").out(htmlBodyUtf8)
-
+    // snippet: search-endpoints
     /** The route a debounced keystroke hits. Empty input — the template action reverse-routes this
       * to `@get('/search/results')`.
       */
@@ -35,5 +32,6 @@ object SearchEndpoints:
             .in(query[String]("datastar"))
             .errorOut(stringBody)
             .out(streamTextBody(ZioStreams)(CodecFormat.TextEventStream()))
+    // snippet-end
 
 end SearchEndpoints

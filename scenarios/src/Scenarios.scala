@@ -9,13 +9,14 @@ import zio.*
 
 /** All scenario examples, mounted together.
   *
-  * Each example contributes its own server endpoints; this object is the single composition the
-  * runnable [[Server]] serves and the routing tests exercise, so they can never drift.
+  * The gallery contributes the page routes (home and each example); every example contributes its
+  * own SSE action endpoints. This object is the single composition the runnable [[Server]] serves
+  * and the routing tests exercise, so they can never drift.
   */
 object Scenarios:
 
     val endpoints: List[ZServerEndpoint[Any, ZioStreams]] =
-        CounterServer.serverEndpoints ++ SearchServer.serverEndpoints
+        GalleryServer.serverEndpoints ++ CounterServer.serverEndpoints ++ SearchServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)

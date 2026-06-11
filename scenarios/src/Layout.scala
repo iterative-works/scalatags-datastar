@@ -15,8 +15,10 @@ object Layout:
     val datastarScript =
         "https://cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.2/bundles/datastar.js"
 
-    /** The full page as an HTML string: the standard head titled `pageTitle`, then `content`. */
-    def page(pageTitle: String)(content: Frag*): String =
+    /** The full page as an HTML string: the standard head titled `pageTitle` (plus any `headExtra`,
+      * e.g. the gallery's stylesheet and highlighter), then `content`.
+      */
+    def page(pageTitle: String, headExtra: Frag = frag())(content: Frag*): String =
         "<!DOCTYPE html>" + html(lang := "en")(
             head(
                 meta(attr("charset") := "utf-8"),
@@ -25,7 +27,8 @@ object Layout:
                     attr("content") := "width=device-width, initial-scale=1"
                 ),
                 tag("title")(pageTitle),
-                script(src := datastarScript, `type` := "module")
+                script(src := datastarScript, `type` := "module"),
+                headExtra
             ),
             body(content*)
         ).render

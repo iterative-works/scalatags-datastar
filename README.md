@@ -148,23 +148,29 @@ below wires them into a tapir `streamTextBody` / http4s `text/event-stream` resp
 ### Example app (`scenarios`, JVM)
 
 A runnable dogfood app on the house stack — ZIO + http4s (Blaze) + Tapir — puts every layer together
-(Phase 5, in progress). Two examples are mounted side by side:
+(Phase 5, in progress). It is a small **examples gallery**, modelled on
+[data-star.dev/examples](https://data-star.dev/examples): a sidebar navigates between demos, and each
+demo runs **beside the typed Scala that produces it**. The source panels are read at runtime from the
+very files that compiled — delimited by `// snippet:` regions — so a shown excerpt can never drift
+from the code that runs; they are syntax-highlighted client-side by a pinned highlight.js build.
 
-- **Server-driven counter** (`/`): the page binds a `Counter` case class to the signal store and a
-  reverse-routed `@post('/increment')` button; the server decodes the round-tripped store with
-  `readSignals`, advances it, and streams a `patch-signals` SSE event built by the codec. The signal
-  store rides in the request body — never a typed endpoint input — so the template action and the
-  handler share one route definition and cannot drift.
-- **Live search** (`/search`): a debounced `data-on:input` fires a reverse-routed `@get('/search/results')`;
-  the server decodes the store, filters a catalogue, and streams a `patch-elements` event. One
-  `results(matches)` fragment renders both the initial list and every patch, so they cannot diverge —
-  the symmetry the library is built for. A `@get` action carries the signals in a `datastar` query
-  parameter (not a body), which the server endpoint decodes through the same `readSignals`.
+- **Server-driven counter** (`/examples/counter`): the page binds a `Counter` case class to the
+  signal store and a reverse-routed `@post('/increment')` button; the server decodes the
+  round-tripped store with `readSignals`, advances it, and streams a `patch-signals` SSE event built
+  by the codec. The signal store rides in the request body — never a typed endpoint input — so the
+  template action and the handler share one route definition and cannot drift.
+- **Live search** (`/examples/search`): a debounced `data-on:input` fires a reverse-routed
+  `@get('/search/results')`; the server decodes the store, filters a catalogue, and streams a
+  `patch-elements` event. One `results(matches)` fragment renders both the initial list and every
+  patch, so they cannot diverge — the symmetry the library is built for. A `@get` action carries the
+  signals in a `datastar` query parameter (not a body), which the server endpoint decodes through the
+  same `readSignals`.
 
 ```bash
-./mill scenarios.run        # serves both examples; set PORT to override 8080
-#   http://localhost:8080/         — counter
-#   http://localhost:8080/search   — live search
+./mill scenarios.run        # serves the gallery; set PORT to override 8080
+#   http://localhost:8080/                   — gallery home
+#   http://localhost:8080/examples/counter   — counter
+#   http://localhost:8080/examples/search    — live search
 ```
 
 ## Build

@@ -26,11 +26,6 @@ object SearchRoutesTest extends TestSuite:
 
     val tests = Tests:
 
-        test("GET /search returns the rendered live-search page"):
-            val (response, body) = call(Request[F](Method.GET, uri"/search"))
-            assert(response.status.code == 200)
-            assert(body.contains("""data-on:input__debounce.300ms="@get('/search/results')""""))
-
         test("GET /search/results streams the patch-elements event for the filtered list"):
             val request = Request[F](
                 Method.GET,

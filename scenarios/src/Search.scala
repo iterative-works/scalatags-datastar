@@ -13,9 +13,11 @@ import zio.json.{JsonDecoder, JsonEncoder}
   * `datastar` query parameter a `@get` action sends. The companion mixes in [[Signals.Handles]] so
   * the template binds the input to `Search.query` as a typed handle.
   */
+// snippet: search-store
 final case class Search(query: String = "") derives Signals, JsonEncoder, JsonDecoder
 object Search extends Signals.Handles[Search]:
     val query = signal("query")
+// snippet-end
 
 /** The fixed catalogue the example filters — a handful of programming languages. */
 object Languages:

@@ -9,16 +9,15 @@ import zio.*
   */
 object Server extends ZIOAppDefault:
 
-    private val scenarios = CounterServer.serverEndpoints ++ SearchServer.serverEndpoints
-
     def run: ZIO[Any, Throwable, Unit] =
         for
             port <- System.env("PORT").map(_.flatMap(_.toIntOption).getOrElse(8080))
             _ <- ZIO.scoped:
                 for
-                    _ <- HttpServer.serve(scenarios, port)
-                    _ <- ZIO.logInfo(s"Counter scenario at http://localhost:$port/")
-                    _ <- ZIO.logInfo(s"Live-search scenario at http://localhost:$port/search")
+                    _ <- HttpServer.serve(Scenarios.endpoints, port)
+                    _ <- ZIO.logInfo(s"Gallery at http://localhost:$port/")
+                    _ <- ZIO.logInfo(s"  counter:     http://localhost:$port/examples/counter")
+                    _ <- ZIO.logInfo(s"  live search: http://localhost:$port/examples/search")
                     _ <- ZIO.never
                 yield ()
         yield ()

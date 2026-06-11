@@ -1,4 +1,4 @@
-// PURPOSE: Unit tests for the live-search example's pure pieces — the filter and the page render.
+// PURPOSE: Unit tests for the live-search example's pure pieces — the filter and the widget render.
 // PURPOSE: Pins the reusable results fragment and the typed Datastar attributes the round trip needs.
 package works.iterative.scalatags.datastar.scenarios
 
@@ -27,27 +27,20 @@ object SearchViewTest extends TestSuite:
             assert(html.startsWith("""<ul id="results">"""))
             assert(html.contains("No matches"))
 
-        test("page seeds the signal store from the case class"):
-            assert(SearchView.page.contains("""data-signals="{query: ''}""""))
+        test("the widget seeds the signal store from the case class"):
+            assert(SearchView.demo.render.contains("""data-signals="{query: ''}""""))
 
-        test("page two-way binds the input to the query signal"):
-            assert(SearchView.page.contains("""data-bind="query""""))
+        test("the widget two-way binds the input to the query signal"):
+            assert(SearchView.demo.render.contains("""data-bind="query""""))
 
-        test("page debounces the input and reverse-routes the search action"):
-            assert(SearchView.page.contains(
+        test("the widget debounces the input and reverse-routes the search action"):
+            assert(SearchView.demo.render.contains(
                 """data-on:input__debounce.300ms="@get('/search/results')""""
             ))
 
-        test("page renders the full catalog before any filtering"):
-            assert(SearchView.page.contains("""<ul id="results">"""))
-            assert(SearchView.page.contains("<li>Scala</li>"))
-
-        test("page loads the Datastar client matching the codec's wire format"):
-            assert(SearchView.page.contains("starfederation/datastar@v1.0.2"))
-            assert(!SearchView.page.contains("merge-elements"))
-
-        test("page is a complete HTML document"):
-            assert(SearchView.page.startsWith("<!DOCTYPE html>"))
+        test("the widget renders the full catalog before any filtering"):
+            assert(SearchView.demo.render.contains("""<ul id="results">"""))
+            assert(SearchView.demo.render.contains("<li>Scala</li>"))
 
     end tests
 

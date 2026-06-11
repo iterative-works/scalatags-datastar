@@ -1,4 +1,4 @@
-// PURPOSE: Server logic for the live-search example — page rendering and the SSE search handler.
+// PURPOSE: Server logic for the live-search example — the SSE search handler on the house stack.
 // PURPOSE: Decodes the `datastar` query param, filters the catalogue, patches the same results Frag.
 package works.iterative.scalatags.datastar.scenarios
 
@@ -10,7 +10,7 @@ import zio.stream.ZStream
 import java.nio.charset.StandardCharsets.UTF_8
 import works.iterative.scalatags.datastar.sse.{ServerSentEvents, readSignals}
 
-/** The live-search example, wired to the house server stack.
+/** The live-search example's action handler, wired to the house server stack.
   *
   * The search handler decodes the `datastar` query parameter into the typed `Search` store with
   * `readSignals`, filters the catalogue, and answers with a `patch-elements` SSE event built from
@@ -19,9 +19,7 @@ import works.iterative.scalatags.datastar.sse.{ServerSentEvents, readSignals}
   */
 object SearchServer:
 
-    private val pageLogic: ZServerEndpoint[Any, Any] =
-        SearchEndpoints.page.zServerLogic(_ => ZIO.succeed(SearchView.page))
-
+    // snippet: search-server
     private val searchLogic: ZServerEndpoint[Any, ZioStreams] =
         SearchEndpoints.search.zServerLogic: datastar =>
             readSignals[Search](datastar) match
@@ -32,9 +30,10 @@ object SearchServer:
                     ZIO.succeed(ZStream.fromChunk(Chunk.fromArray(event.getBytes(UTF_8))))
                 case Left(error) =>
                     ZIO.fail(s"Could not read signals: $error")
+    // snippet-end
 
     val serverEndpoints: List[ZServerEndpoint[Any, ZioStreams]] =
-        List(pageLogic, searchLogic)
+        List(searchLogic)
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(serverEndpoints)
