@@ -39,7 +39,7 @@ decoded server-side via `readSignals`.
   `zio-http-datastar-sdk` (wrong server stack, trivial wire format).
 - **Example app:** tapir + http4s + ZIO, to dogfood the real house stack and actually
   exercise the typed-endpoint guarantee.
-- **Baseline:** Mill 1.1.2, Scala 3.3.7, scalatags 0.13.1, tapir 1.13.15, ZIO, http4s
+- **Baseline:** Mill 1.1.2, Scala 3.3.8 (LTS), scalatags 0.13.1, tapir 1.13.20, ZIO, http4s
   — matching `scalatags-webawesome` and the iw-support libs.
 
 ## Module plan

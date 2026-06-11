@@ -147,7 +147,7 @@ tapir `streamBody` / http4s SSE response lands with the dogfood app (Phase 5).
 
 ## Build
 
-Mill 1.1.2, Scala 3.3.7.
+Mill 1.1.2, Scala 3.3.8 (LTS).
 
 ```bash
 ./mill datastar.jvm.test       # core binding tests
