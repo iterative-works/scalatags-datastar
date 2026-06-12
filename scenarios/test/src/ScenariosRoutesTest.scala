@@ -65,6 +65,20 @@ object ScenariosRoutesTest extends TestSuite:
             assert(response.status.code == 200)
             assert(response.contentType.exists(_.mediaType == MediaType.`text/event-stream`))
 
+        test("POST /increment with a body that does not fit the store is a 400"):
+            val request = Request[F](Method.POST, uri"/increment")
+                .withEntity("""{"count":"nope"}""")
+            val (response, _) = call(request)
+            assert(response.status.code == 400)
+
+        test("GET /search/results with a datastar param that does not fit the store is a 400"):
+            val request = Request[F](
+                Method.GET,
+                uri"/search/results".withQueryParam("datastar", "not json")
+            )
+            val (response, _) = call(request)
+            assert(response.status.code == 400)
+
     end tests
 
 end ScenariosRoutesTest

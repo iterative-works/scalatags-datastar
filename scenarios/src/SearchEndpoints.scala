@@ -24,13 +24,13 @@ object SearchEndpoints:
         endpoint.get.in("search" / "results")
 
     /** The server endpoint: the round-tripped signal store arrives URL-encoded in the `datastar`
-      * query parameter, and the response streams a `patch-elements` event as `text/event-stream`. A
-      * parameter that does not decode into the signal model is a client error (`400`).
+      * query parameter — decoded into the typed `Search` by [[SignalsInput.query]], so a parameter
+      * that does not fit the store is already a `400` and the handler only sees a valid one — and
+      * the response streams a `patch-elements` event as `text/event-stream`.
       */
-    val search: PublicEndpoint[String, String, Stream[Throwable, Byte], ZioStreams] =
+    val search: PublicEndpoint[Search, Unit, Stream[Throwable, Byte], ZioStreams] =
         searchRoute
-            .in(query[String]("datastar"))
-            .errorOut(stringBody)
+            .in(SignalsInput.query[Search])
             .out(streamTextBody(ZioStreams)(CodecFormat.TextEventStream()))
     // snippet-end
 

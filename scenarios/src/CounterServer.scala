@@ -8,26 +8,22 @@ import org.http4s.HttpRoutes
 import zio.*
 import zio.stream.ZStream
 import java.nio.charset.StandardCharsets.UTF_8
-import works.iterative.scalatags.datastar.sse.{ServerSentEvents, readSignals}
+import works.iterative.scalatags.datastar.sse.ServerSentEvents
 
 /** The counter example's action handler, wired to the house server stack.
   *
-  * The increment handler is the round trip: it decodes the request body into the typed `Counter`
-  * store with `readSignals`, advances it, and answers with a `patch-signals` SSE event built by the
-  * codec — streamed out as `text/event-stream`. The codec stays the single source of the wire
-  * bytes; tapir only carries the string it produced.
+  * The increment handler is the round trip: it receives the request body already decoded into the
+  * typed `Counter` store (by [[SignalsInput.body]]), advances it, and answers with a
+  * `patch-signals` SSE event built by the codec — streamed out as `text/event-stream`. The codec
+  * stays the single source of the wire bytes; tapir only carries the string it produced.
   */
 object CounterServer:
 
     // snippet: counter-server
     private val incrementLogic: ZServerEndpoint[Any, ZioStreams] =
-        CounterEndpoints.increment.zServerLogic: body =>
-            readSignals[Counter](body) match
-                case Right(counter) =>
-                    val event = ServerSentEvents.patchSignals(counter.incremented)
-                    ZIO.succeed(ZStream.fromChunk(Chunk.fromArray(event.getBytes(UTF_8))))
-                case Left(error) =>
-                    ZIO.fail(s"Could not read signals: $error")
+        CounterEndpoints.increment.zServerLogic: counter =>
+            val event = ServerSentEvents.patchSignals(counter.incremented)
+            ZIO.succeed(ZStream.fromChunk(Chunk.fromArray(event.getBytes(UTF_8))))
     // snippet-end
 
     val serverEndpoints: List[ZServerEndpoint[Any, ZioStreams]] =

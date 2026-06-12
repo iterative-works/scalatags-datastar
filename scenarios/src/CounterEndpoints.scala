@@ -23,14 +23,14 @@ object CounterEndpoints:
     val incrementRoute: PublicEndpoint[Unit, Unit, Unit, Any] =
         endpoint.post.in("increment")
 
-    /** The server endpoint: the round-tripped signal store arrives as the JSON request body, and
-      * the response streams Datastar SSE events as `text/event-stream`. A body that does not decode
-      * into the signal model is a client error (`400`).
+    /** The server endpoint: the round-tripped signal store arrives as the JSON request body —
+      * decoded into the typed `Counter` by [[SignalsInput.body]], so a body that does not fit the
+      * store is already a `400` and the handler only sees a valid one — and the response streams
+      * Datastar SSE events as `text/event-stream`.
       */
-    val increment: PublicEndpoint[String, String, Stream[Throwable, Byte], ZioStreams] =
+    val increment: PublicEndpoint[Counter, Unit, Stream[Throwable, Byte], ZioStreams] =
         incrementRoute
-            .in(stringJsonBody)
-            .errorOut(stringBody)
+            .in(SignalsInput.body[Counter])
             .out(streamTextBody(ZioStreams)(CodecFormat.TextEventStream()))
     // snippet-end
 
