@@ -72,7 +72,9 @@ object datastar extends Module {
   }
 }
 
-// Phase 3 spike: reverse-route Tapir endpoints to the relative URLs Datastar actions need.
+// The Tapir bridge: reverse-route Tapir endpoints to the relative URLs Datastar actions need, and
+// build the `@verb('/url', …)` action expressions from them. It depends on the core bindings — it
+// emits Datastar syntax and renders core's `ActionOptions` — so a bridge depends on what it bridges.
 object tapir extends Module {
 
   trait Shared extends ScalaModule with ScalafmtModule with ScalafixModule {
@@ -90,16 +92,17 @@ object tapir extends Module {
   }
 
   object jvm extends Shared {
-    // Test-only dependency on the core bindings, to prove actions compose with `dataOn`.
-    // The published bridge stays decoupled from core (scalatags only).
+    def moduleDeps = Seq(datastar.jvm)
+
     object test extends ScalaTests with TestModule.Utest {
-      def moduleDeps = super.moduleDeps ++ Seq(datastar.jvm)
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
     }
   }
 
   object js extends Shared with ScalaJSModule {
     def scalaJSVersion = scalaJSV
+
+    def moduleDeps = Seq(datastar.js)
 
     object test extends ScalaJSTests with TestModule.Utest {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")

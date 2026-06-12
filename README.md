@@ -102,7 +102,7 @@ Datastar's action **options** are typed via a second argument. `ActionOptions` c
 set are rendered, so the default stays a bare `@verb('/url')`.
 
 ```scala
-import works.iterative.scalatags.datastar.tapir.ActionOptions
+import works.iterative.scalatags.datastar.ActionOptions
 
 val save = endpoint.post.in("contacts" / path[Long]("id"))
 

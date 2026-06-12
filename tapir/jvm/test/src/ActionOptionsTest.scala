@@ -5,6 +5,7 @@ package works.iterative.scalatags.datastar.tapir
 import utest.*
 import scalatags.Text.all.*
 import works.iterative.scalatags.datastar.Datastar.*
+import works.iterative.scalatags.datastar.ActionOptions
 import sttp.tapir.*
 import EndpointAction.action
 

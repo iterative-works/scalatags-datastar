@@ -1,6 +1,6 @@
 // PURPOSE: Typed options for a Datastar backend action — the {contentType, headers} object literal.
 // PURPOSE: Renders to the JS object Datastar parses as the action's second argument, or to nothing.
-package works.iterative.scalatags.datastar.tapir
+package works.iterative.scalatags.datastar
 
 /** How a Datastar action encodes its request body. */
 enum ContentType(val value: String):
@@ -17,7 +17,8 @@ end ContentType
   *
   * Header keys are rendered as quoted strings (header names routinely contain `-`, which is not a
   * bare JS identifier); header values and the content type are rendered as escaped single-quoted
-  * string literals. Headers keep their insertion order.
+  * string literals, the same form the expression DSL uses for a `String` literal. Headers keep
+  * their insertion order.
   *
   * The covered keys are `contentType` and `headers`; Datastar's remaining action options
   * (`selector`, `filterSignals`, `openWhenHidden`, the `retry*` family, …) can be added as fields
@@ -33,7 +34,7 @@ final case class ActionOptions(
         copy(headers = headers :+ (name -> value))
 
     /** The `{…}` object literal for these options, or the empty string when nothing is set. */
-    private[tapir] def render: String =
+    private[datastar] def render: String =
         val fields =
             contentType.map(ct => s"contentType: ${ActionOptions.jsString(ct.value)}").toList ++
                 Option
@@ -60,11 +61,10 @@ object ActionOptions:
     /** Options sending the signal store as JSON (Datastar's default, made explicit). */
     def json: ActionOptions = ActionOptions(contentType = Some(ContentType.Json))
 
-    /** Renders a string as an escaped, single-quoted JS string literal. Unlike the reverse-routed
-      * URL (pre-percent-encoded by the router), header keys and values are developer-supplied, so
-      * both the backslash and the apostrophe must be escaped.
+    /** Renders a string as an escaped, single-quoted JS string literal. Header keys, header values
+      * and the content type are developer-supplied, so both the backslash and the apostrophe are
+      * escaped. Shares the expression DSL's `ExprLiteral[String]` so the two cannot diverge.
       */
-    private def jsString(value: String): String =
-        "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
+    private def jsString(value: String): String = summon[ExprLiteral[String]].render(value)
 
 end ActionOptions

@@ -4,6 +4,7 @@ package works.iterative.scalatags.datastar.tapir
 
 import sttp.tapir.PublicEndpoint
 import sttp.model.Method
+import works.iterative.scalatags.datastar.ActionOptions
 
 /** Datastar backend actions from typed endpoints.
   *
