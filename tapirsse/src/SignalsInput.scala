@@ -1,6 +1,6 @@
 // PURPOSE: Tapir inputs that carry Datastar's signal store, decoded into the typed model.
 // PURPOSE: Decoding lives in the codec, so a payload that does not fit the store is a 400, not a match.
-package works.iterative.scalatags.datastar.scenarios
+package works.iterative.scalatags.datastar.tapir.sse
 
 import sttp.tapir.{stringJsonBody, DecodeResult, EndpointIO, EndpointInput}
 import sttp.tapir.query as datastarQuery

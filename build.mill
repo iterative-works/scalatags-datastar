@@ -128,12 +128,32 @@ object sse extends ScalaModule with ScalafmtModule with ScalafixModule {
   }
 }
 
+// The Tapir + SSE server bridge: the Datastar signal-store input codecs (a malformed payload is a
+// 400, decoded in the codec) and the `text/event-stream` output plus response stream a handler
+// answers an action with. Joins the two surfaces it depends on — the tapir bridge and the SSE
+// codec — onto a Tapir/ZIO server, so it is JVM-only.
+object tapirsse extends ScalaModule with ScalafmtModule with ScalafixModule {
+  def scalaVersion = scalaV
+
+  def moduleDeps = Seq(tapir.jvm, sse)
+
+  def mvnDeps = Seq(
+    mvn"com.softwaremill.sttp.tapir::tapir-zio::$tapirV",
+    mvn"dev.zio::zio-streams::$zioV",
+    mvn"dev.zio::zio-json::$zioJsonV"
+  )
+
+  object test extends ScalaTests with TestModule.Utest {
+    def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
+  }
+}
+
 // Phase 5 dogfood app: canonical Datastar examples on the house stack (tapir + http4s + ZIO),
 // proving the typed bindings, the endpoint bridge and the SSE codec compose end to end. JVM-only.
 object scenarios extends ScalaModule with ScalafmtModule with ScalafixModule {
   def scalaVersion = scalaV
 
-  def moduleDeps = Seq(datastar.jvm, tapir.jvm, sse)
+  def moduleDeps = Seq(datastar.jvm, tapir.jvm, sse, tapirsse)
 
   // The gallery shows each example's source beside its live demo. Putting the source tree on the
   // classpath lets the app read its own `.scala` files at runtime (and in tests), so a displayed

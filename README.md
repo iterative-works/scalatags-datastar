@@ -147,8 +147,44 @@ readSignals[Counter]("""{"count":5,"step":1}""")   // Right(Counter(5, 1))
 ```
 
 Only non-default options emit data lines, so a bare `patchElements(frag)` is just `event:` +
-`data: elements …`. The codec is stack-neutral — it produces the SSE strings; the `scenarios` app
-below wires them into a tapir `streamTextBody` / http4s `text/event-stream` response.
+`data: elements …`. The codec is stack-neutral — it produces the SSE strings; the server bridge
+below wires them onto a Tapir/ZIO server, and the `scenarios` app puts the whole round trip together.
+
+### Server bridge (Tapir + SSE, JVM)
+
+A third `import works.iterative.scalatags.datastar.tapir.sse.*` is the server-side counterpart to the
+action bridge: it carries the inbound signal store into a typed Tapir input, declares the outbound
+`text/event-stream`, and re-exports the SSE codec — so a handler reaches the whole server side through
+one import.
+
+```scala
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
+
+// The route the template reverse-routes — empty input, because the signal store is a separate
+// channel, never a typed endpoint parameter.
+val incrementRoute = endpoint.post.in("increment")
+
+// Its server realization: the round-tripped store decodes from the request, the response streams
+// Datastar SSE events.
+val increment =
+  incrementRoute
+    .in(SignalsInput.body[Counter])   // store from the @post body; a payload that misfits is a 400
+    .out(datastarEvents)              // text/event-stream of Datastar SSE events
+
+val handler = increment.zServerLogic: counter =>
+  val event = ServerSentEvents.patchSignals(counter.incremented)  // re-exported codec
+  ZIO.succeed(datastarStream(event))  // rendered event strings → the response byte stream
+```
+
+`SignalsInput` decodes the store **in the codec layer**, so a payload that does not fit the case
+class is a `400` before the handler runs — `.body[A]` reads a `@post` JSON body, `.query[A]` the
+`datastar` query parameter a `@get` action sends. `datastarEvents` is the matching
+`text/event-stream` output, and `datastarStream(events*)` turns the strings the codec rendered into
+the response byte stream — no `ZStream`/`Chunk`/`getBytes` plumbing. The import also re-exports
+`ServerSentEvents`, `ElementPatchMode` and `readSignals`, so the handler needs nothing further from
+the codec module.
 
 ### Example app (`scenarios`, JVM)
 
@@ -186,6 +222,7 @@ Mill 1.1.2, Scala 3.3.8 (LTS).
 ./mill datastar.jvm.test       # core binding tests
 ./mill tapir.jvm.test          # endpoint bridge tests
 ./mill sse.test                # server SSE codec + conformance suite
+./mill tapirsse.test           # tapir↔SSE server bridge: input codecs, event stream
 ./mill scenarios.test          # dogfood app: unit + integration + end-to-end
 ./mill __.compile              # cross-compile check (JVM + JS)
 ./mill __.reformat             # format

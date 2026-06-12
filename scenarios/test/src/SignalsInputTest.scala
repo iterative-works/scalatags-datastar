@@ -8,6 +8,7 @@ import zio.interop.catz.*
 import org.http4s.*
 import org.http4s.implicits.*
 import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.SignalsInput
 
 object SignalsInputTest extends TestSuite:
 

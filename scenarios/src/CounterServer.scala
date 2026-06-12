@@ -6,9 +6,7 @@ import sttp.tapir.ztapir.*
 import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
 import zio.*
-import zio.stream.ZStream
-import java.nio.charset.StandardCharsets.UTF_8
-import works.iterative.scalatags.datastar.sse.ServerSentEvents
+import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The counter example's action handler, wired to the house server stack.
   *
@@ -23,7 +21,7 @@ object CounterServer:
     private val incrementLogic: ZServerEndpoint[Any, ZioStreams] =
         CounterEndpoints.increment.zServerLogic: counter =>
             val event = ServerSentEvents.patchSignals(counter.incremented)
-            ZIO.succeed(ZStream.fromChunk(Chunk.fromArray(event.getBytes(UTF_8))))
+            ZIO.succeed(datastarStream(event))
     // snippet-end
 
     val serverEndpoints: List[ZServerEndpoint[Any, ZioStreams]] =

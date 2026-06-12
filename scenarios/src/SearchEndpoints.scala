@@ -5,6 +5,7 @@ package works.iterative.scalatags.datastar.scenarios
 import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
 import zio.stream.Stream
+import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The live-search example's action route.
   *
@@ -31,7 +32,7 @@ object SearchEndpoints:
     val search: PublicEndpoint[Search, Unit, Stream[Throwable, Byte], ZioStreams] =
         searchRoute
             .in(SignalsInput.query[Search])
-            .out(streamTextBody(ZioStreams)(CodecFormat.TextEventStream()))
+            .out(datastarEvents)
     // snippet-end
 
 end SearchEndpoints

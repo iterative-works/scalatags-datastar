@@ -49,6 +49,7 @@ decoded server-side via `readSignals`.
 | `scalatags-datastar`         | core attribute + action bindings (scalatags only)         | JVM + JS  |
 | `scalatags-datastar-tapir`   | endpoint reverse-routing bridge (typed backend actions)   | JVM + JS  |
 | `scalatags-datastar-sse`     | server SSE codec: patch-elements / -signals / readSignals | JVM       |
+| `tapirsse`                   | tapir↔SSE server bridge: input codecs + event stream      | JVM       |
 | `scenarios`                  | tapir + http4s + ZIO dogfood app                          | JVM       |
 
 Kept separate so the core bindings stay dependency-light (scalatags only), exactly
@@ -211,6 +212,12 @@ source that produces it, highlighted client-side): a server-driven counter (POST
 `patch-elements`, one fragment rendering both the initial list and every patch) — exercising the typed
 bindings, the endpoint bridge and the SSE codec end to end, wiring the previously deferred SSE transport
 (`streamTextBody` over `text/event-stream`) and proving it with unit, in-process integration and
-real-socket end-to-end tests.
+real-socket end-to-end tests. That transport is now a library module of its own — the JVM-only
+`tapirsse` bridge (`works.iterative.scalatags.datastar.tapir.sse`): `SignalsInput.body/.query` decode
+the round-tripped store into a typed input in the codec layer (a misfit payload is a `400`, never a
+match in the handler), `datastarEvents` is the `text/event-stream` output, and `datastarStream` turns
+the codec's rendered event strings into the response byte stream. It is the server-side third import
+star, re-exporting the SSE codec so a handler reaches the whole server side through one import; the
+`scenarios` app consumes it instead of hand-plumbing tapir/`ZStream`.
 Next within Phase 5: more canonical examples (todo, click-to-edit, polling, SSE feed) and the docs
 (llms.txt, contributing).

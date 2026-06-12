@@ -6,9 +6,7 @@ import sttp.tapir.ztapir.*
 import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
 import zio.*
-import zio.stream.ZStream
-import java.nio.charset.StandardCharsets.UTF_8
-import works.iterative.scalatags.datastar.sse.ServerSentEvents
+import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The live-search example's action handler, wired to the house server stack.
   *
@@ -26,7 +24,7 @@ object SearchServer:
             val event = ServerSentEvents.patchElements(
                 SearchView.results(Languages.matching(search.query))
             )
-            ZIO.succeed(ZStream.fromChunk(Chunk.fromArray(event.getBytes(UTF_8))))
+            ZIO.succeed(datastarStream(event))
     // snippet-end
 
     val serverEndpoints: List[ZServerEndpoint[Any, ZioStreams]] =

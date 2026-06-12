@@ -5,6 +5,7 @@ package works.iterative.scalatags.datastar.scenarios
 import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
 import zio.stream.Stream
+import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The counter example's action route.
   *
@@ -31,7 +32,7 @@ object CounterEndpoints:
     val increment: PublicEndpoint[Counter, Unit, Stream[Throwable, Byte], ZioStreams] =
         incrementRoute
             .in(SignalsInput.body[Counter])
-            .out(streamTextBody(ZioStreams)(CodecFormat.TextEventStream()))
+            .out(datastarEvents)
     // snippet-end
 
 end CounterEndpoints
