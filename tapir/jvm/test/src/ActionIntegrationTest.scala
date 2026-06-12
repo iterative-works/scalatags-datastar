@@ -7,7 +7,6 @@ import scalatags.Text.all.*
 import works.iterative.scalatags.datastar.Datastar.*
 import sttp.tapir.*
 import scala.concurrent.duration.*
-import EndpointAction.action
 
 object ActionIntegrationTest extends TestSuite:
 
@@ -18,17 +17,15 @@ object ActionIntegrationTest extends TestSuite:
     val tests = Tests {
 
         test("action wires into data-on and renders verb plus reverse-routed url") {
-            val toggle = action(toggleTodo)
-            val rendered = button(dataOn("click") := toggle(7L))("Toggle").render
+            val rendered = button(dataOn("click") := toggleTodo.action(7L))("Toggle").render
             assert(
                 rendered == """<button data-on:click="@post('/todos/7/toggle')">Toggle</button>"""
             )
         }
 
         test("action composes with data-on modifiers") {
-            val search = action(searchTodos)
             val rendered =
-                input(dataOn("input").debounce(300.millis) := search("milk")).render
+                input(dataOn("input").debounce(300.millis) := searchTodos.action("milk")).render
             assert(
                 rendered == """<input data-on:input__debounce.300ms="@get('/todos?q=milk')" />"""
             )

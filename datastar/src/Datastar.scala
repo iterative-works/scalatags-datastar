@@ -62,5 +62,19 @@ trait DatastarAttrs:
 
 end DatastarAttrs
 
-/** Entry point: `import works.iterative.scalatags.datastar.Datastar.*`. */
-object Datastar extends DatastarAttrs
+/** The core entry point: a single `import works.iterative.scalatags.datastar.Datastar.*` brings the
+  * whole DSL into scope — the `data-*` attribute builders (inherited from [[DatastarAttrs]]), the
+  * typed expression DSL (`lit` and the operators), the signal model (`Signal`, `Signals`), and the
+  * action options object (`ActionOptions`, `ContentType`).
+  */
+object Datastar extends DatastarAttrs:
+    export Expr.*
+    export works.iterative.scalatags.datastar.{
+        Expr,
+        ExprLiteral,
+        Signal,
+        Signals,
+        ActionOptions,
+        ContentType
+    }
+end Datastar

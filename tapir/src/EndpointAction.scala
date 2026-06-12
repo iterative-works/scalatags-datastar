@@ -6,18 +6,45 @@ import sttp.tapir.PublicEndpoint
 import sttp.model.Method
 import works.iterative.scalatags.datastar.ActionOptions
 
-/** Datastar backend actions from typed endpoints.
+/** A Datastar backend action from a typed endpoint, as the `endpoint.action` extension.
   *
-  * A Datastar action like `@get('/users/42')` names a backend by verb and URL. [[action]] derives
-  * both from a Tapir endpoint: the URL by reverse-routing the endpoint's typed input (see
+  * A Datastar action like `@get('/users/42')` names a backend by verb and URL. `endpoint.action`
+  * derives both from a Tapir endpoint: the URL by reverse-routing the endpoint's typed input (see
   * [[EndpointUrl]]), and the verb from the endpoint's fixed HTTP method. A reference to a missing
   * or wrong-shaped endpoint does not compile, and neither the URL nor the verb can drift from the
   * route definition.
+  *
+  * An endpoint with a typed input awaits its value — `toggleTodo.action(7L)` — while an input-free
+  * endpoint is a complete action on its own — `increment.action`. The optional [[ActionOptions]]
+  * argument appends Datastar's options object after the URL, e.g. `save.action(42L,
+  * ActionOptions.form)` → `@post('/save', {contentType: 'form'})`.
   *
   * The reverse-routed URL is escaped into the action's single-quoted string literal, so input
   * values containing an apostrophe cannot break out of the expression or inject further Datastar
   * syntax.
   */
+extension [I](endpoint: PublicEndpoint[I, ?, ?, Any])
+    /** The complete action for an endpoint applied to its input value, e.g. `users.action(42) ==
+      * "@get('/users/42')"`.
+      */
+    def action(input: I): String = EndpointAction.render(endpoint, ActionOptions.empty)(input)
+
+    /** As [[action]], with Datastar's action options object appended after the URL. */
+    def action(input: I, options: ActionOptions): String =
+        EndpointAction.render(endpoint, options)(input)
+end extension
+
+extension (endpoint: PublicEndpoint[Unit, ?, ?, Any])
+    /** The complete action for an input-free endpoint — no value to supply, e.g. `increment.action
+      * \== "@post('/increment')"`.
+      */
+    def action: String = EndpointAction.render(endpoint, ActionOptions.empty)(())
+
+    /** As [[action]], with Datastar's action options object appended after the URL. */
+    def action(options: ActionOptions): String = EndpointAction.render(endpoint, options)(())
+end extension
+
+/** The verb derivation and URL escaping behind the `endpoint.action` extension. */
 object EndpointAction:
 
     /** The Datastar action verb for an endpoint's HTTP method.
@@ -46,20 +73,16 @@ object EndpointAction:
     private def escapeUrl(url: String): String =
         url.replace("'", "\\'")
 
-    /** The action-expression builder for an endpoint, e.g. `_ => "@get('/users/42')"`.
-      *
-      * [[options]] appends Datastar's action options object after the URL, e.g. `@post('/save',
-      * {contentType: 'form'})`; the default (no options) leaves a bare `@verb('/url')`.
-      */
-    def action[I](
+    /** Builds the action expression for an endpoint, applied to its input value. */
+    private[tapir] def render[I](
         endpoint: PublicEndpoint[I, ?, ?, Any],
-        options: ActionOptions = ActionOptions.empty
+        options: ActionOptions
     ): I => String =
         val v = verb(endpoint.method)
         val url = EndpointUrl.urlOf(endpoint)
         val opts = options.render
         val suffix = if opts.isEmpty then "" else s", $opts"
         input => s"@$v('${escapeUrl(url(input))}'$suffix)"
-    end action
+    end render
 
 end EndpointAction

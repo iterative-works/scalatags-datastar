@@ -5,7 +5,7 @@ package works.iterative.scalatags.datastar.scenarios
 import scalatags.Text.all.*
 import scala.concurrent.duration.*
 import works.iterative.scalatags.datastar.Datastar.*
-import works.iterative.scalatags.datastar.Signals
+import works.iterative.scalatags.datastar.tapir.*
 
 /** The live-search example's live fragment.
   *
@@ -17,9 +17,7 @@ import works.iterative.scalatags.datastar.Signals
 object SearchView:
 
     /** The search action, reverse-routed from the search route: `@get('/search/results')`. */
-    private val searchAction: String =
-        works.iterative.scalatags.datastar.tapir.EndpointAction
-            .action(SearchEndpoints.searchRoute)(())
+    private val searchAction: String = SearchEndpoints.searchRoute.action
 
     // snippet: search-view
     /** The result list. Carries the `results` id so a default `patch-elements` event replaces it by
@@ -36,7 +34,7 @@ object SearchView:
       * reverse-routed `@get` action, over the catalogue rendered by [[results]].
       */
     val demo: Frag =
-        div(dataSignals := Signals.encode(Search()))(
+        div(dataSignals := Search())(
             input(
                 `type` := "search",
                 placeholder := "Filter languages…",

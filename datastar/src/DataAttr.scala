@@ -103,6 +103,16 @@ final class SignalsAttr(name: String, mods: Vector[String])
       CaseMods[SignalsAttr]:
     protected def addMod(mod: String): SignalsAttr = new SignalsAttr(name, mods :+ mod)
     def ifMissing: SignalsAttr = addMod("ifmissing")
+
+    /** Seeds the store from a typed signal model, rendering its initial `data-signals` object
+      * literal (`{count: 0, step: 1}`) — the same value `Signals.encode` produces, without the
+      * call. A plain `String` still binds through the inherited `:=`, so the escape hatch stays.
+      */
+    def :=[Builder, A <: Product](model: A)(using
+        signals: Signals[A],
+        ev: generic.AttrValue[Builder, String]
+    ): generic.AttrPair[Builder, String] =
+        toAttr := signals.render(model)
 end SignalsAttr
 
 /** `data-bind` — case modifiers plus `__prop` (bind a DOM property) and `__event`. */

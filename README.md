@@ -54,9 +54,11 @@ The signal store is a **case class** — the single source of truth for its shap
 `derives Signals` gives the initial `data-signals` JSON; mixing `Signals.Handles` into the companion
 gives field-checked, typed handles that read as stable members.
 
+A single `import works.iterative.scalatags.datastar.Datastar.*` brings the whole core DSL into scope:
+the `data-*` builders, the `Expr` DSL (`lit` and the operators), and `Signal`/`Signals`.
+
 ```scala
-import works.iterative.scalatags.datastar.{Signal, Signals}
-import works.iterative.scalatags.datastar.Expr.*
+import works.iterative.scalatags.datastar.Datastar.*
 
 final case class Counter(count: Int = 0, step: Int = 1) derives Signals
 object Counter extends Signals.Handles[Counter]:
@@ -64,12 +66,15 @@ object Counter extends Signals.Handles[Counter]:
   val step  = signal("step")    // signal("nope") would not compile
 
 div(
-  dataSignals := Signals.encode(Counter()),        // data-signals="{count: 0, step: 1}"
+  dataSignals := Counter(),                        // data-signals="{count: 0, step: 1}"
   input(`type` := "number", dataBind := Counter.step),  // data-bind="step" (two-way, bare name)
   span(dataShow := Counter.count > lit(0),         // data-show="$count &gt; 0" (browser decodes)
        dataText := Counter.count)                  // data-text="$count"
 )
 ```
+
+`dataSignals := Counter()` seeds the store straight from the case class; a plain `String` still binds
+through the same `:=` when you need the escape hatch.
 
 `Expr` operators render with JavaScript precedence, so `(Counter.count > lit(5)) && !busy` becomes
 `$count > 5 && !$busy` with only the parentheses meaning requires. Equality is `===`/`!==` (Scala
@@ -80,33 +85,33 @@ can't override `==`); numeric operators are gated by `Numeric`.
 Backend actions are reverse-routed from Tapir endpoints, so a template can only reference a
 route that exists, and the verb and URL are both derived from the endpoint — they cannot drift.
 
+A second `import works.iterative.scalatags.datastar.tapir.*` adds the `endpoint.action` extension.
+
 ```scala
 import sttp.tapir.*
-import works.iterative.scalatags.datastar.tapir.EndpointAction.action
+import works.iterative.scalatags.datastar.tapir.*
 
 val toggleTodo = endpoint.post.in("todos" / path[Long]("id") / "toggle")
 
-// action derives the verb (POST) and reverse-routes the URL, both from the endpoint.
-val toggle = action(toggleTodo)               // Long => String
-button(dataOn("click") := toggle(7L))("Toggle")
+// .action derives the verb (POST) and reverse-routes the URL, both from the endpoint.
+button(dataOn("click") := toggleTodo.action(7L))("Toggle")
 // <button data-on:click="@post('/todos/7/toggle')">Toggle</button>
 ```
 
-`action` is total — `I => String`. The four mutating verbs map directly; an endpoint that fixes no
-method (or a non-action method such as HEAD) falls back to `@get`, matching Tapir's own client
-interpreter, which realizes a methodless endpoint as GET. The reverse-routed URL is escaped into the
-action's string literal, so values can't break out of the expression.
+`endpoint.action(input)` is total — `String`. An input-free endpoint needs no value: `increment.action`.
+The four mutating verbs map directly; an endpoint that fixes no method (or a non-action method such as
+HEAD) falls back to `@get`, matching Tapir's own client interpreter, which realizes a methodless
+endpoint as GET. The reverse-routed URL is escaped into the action's string literal, so values can't
+break out of the expression.
 
-Datastar's action **options** are typed via a second argument. `ActionOptions` covers `contentType`
+Datastar's action **options** are typed via an optional argument. `ActionOptions` covers `contentType`
 (JSON by default, or `form` to submit the enclosing form) and request `headers`; only the fields you
 set are rendered, so the default stays a bare `@verb('/url')`.
 
 ```scala
-import works.iterative.scalatags.datastar.ActionOptions
-
 val save = endpoint.post.in("contacts" / path[Long]("id"))
 
-button(dataOn("click") := action(save, ActionOptions.form.withHeader("X-CSRF-Token", token))(42L))("Save")
+button(dataOn("click") := save.action(42L, ActionOptions.form.withHeader("X-CSRF-Token", token)))("Save")
 // <button data-on:click="@post('/contacts/42', {contentType: 'form', headers: {'X-CSRF-Token': '…'}})">Save</button>
 ```
 

@@ -102,19 +102,19 @@ like `scalatags-webawesome`.
 - **Phase 3 — Tapir endpoint bridge.** ✅ DONE. `EndpointUrl.urlOf(endpoint): I => String`
   reverse-routes via the sttp client interpreter with no base URI, yielding a relative `/path?query`
   (leading slash guaranteed; query values form-encoded and round-tripping through Tapir's own server
-  decoder). `EndpointAction.action(endpoint): I => String` is total — it derives the Datastar action
-  from the endpoint: the verb from `endpoint.method` (the four mutating verbs map directly; a
-  methodless endpoint or a non-action method such as HEAD falls back to `@get`, mirroring Tapir's own
-  client interpreter which realizes a methodless endpoint as `method.getOrElse(Method.GET)`), the URL
-  by reverse-routing. The embedded URL is escaped into the single-quoted literal so an apostrophe in a
-  value cannot break out or inject expression syntax (every other literal-breaking char is
-  percent-encoded by the router — pinned by test). Wires into `dataOn` end-to-end:
-  `dataOn("click") := action(ep)(input)` renders `data-on:click="@post('/todos/7/toggle')"`.
-  Cross-compiles JVM+JS; the published bridge depends on tapir only (core dependency is test-scoped).
+  decoder). The `endpoint.action` extension is total: `endpoint.action(input): String` (an input-free
+  endpoint is `endpoint.action`). It derives the Datastar action from the endpoint: the verb from
+  `endpoint.method` (the four mutating verbs map directly; a methodless endpoint or a non-action method
+  such as HEAD falls back to `@get`, mirroring Tapir's own client interpreter which realizes a
+  methodless endpoint as `method.getOrElse(Method.GET)`), the URL by reverse-routing. The embedded URL
+  is escaped into the single-quoted literal so an apostrophe in a value cannot break out or inject
+  expression syntax (every other literal-breaking char is percent-encoded by the router — pinned by
+  test). Wires into `dataOn` end-to-end: `dataOn("click") := toggleTodo.action(7L)` renders
+  `data-on:click="@post('/todos/7/toggle')"`. Cross-compiles JVM+JS; the bridge depends on core.
   *Headline differentiator.* The GET fallback is specific to this Tapir-endpoint binding (faithful to
   Tapir); a future non-Tapir action source could choose different verb-resolution logic.
-  Action **options** are typed too: `action(ep, options)` appends Datastar's options object after the
-  URL — `@post('/save', {contentType: 'form'})`. `ActionOptions` covers `contentType` (a `ContentType`
+  Action **options** are typed too: `endpoint.action(input, options)` appends Datastar's options object
+  after the URL — `@post('/save', {contentType: 'form'})`. `ActionOptions` covers `contentType` (a `ContentType`
   enum → `'json'`/`'form'`) and `headers` (insertion-ordered, keys quoted since header names carry `-`,
   values escaped). Only set fields render, so the default leaves a bare `@verb('/url')` and every
   existing call site is unchanged. *Deferred (add as fields when needed):* Datastar's remaining action

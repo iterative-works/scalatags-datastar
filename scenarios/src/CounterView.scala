@@ -4,7 +4,7 @@ package works.iterative.scalatags.datastar.scenarios
 
 import scalatags.Text.all.*
 import works.iterative.scalatags.datastar.Datastar.*
-import works.iterative.scalatags.datastar.Signals
+import works.iterative.scalatags.datastar.tapir.*
 
 /** The counter example's live fragment.
   *
@@ -17,14 +17,12 @@ object CounterView:
 
     // snippet: counter-view
     /** The click action, reverse-routed from the increment route: `@post('/increment')`. */
-    private val incrementAction: String =
-        works.iterative.scalatags.datastar.tapir.EndpointAction
-            .action(CounterEndpoints.incrementRoute)(())
+    private val incrementAction: String = CounterEndpoints.incrementRoute.action
 
     /** The interactive counter: the seeded signal store, the live count, and the increment button.
       */
     val demo: Frag =
-        div(dataSignals := Signals.encode(Counter()))(
+        div(dataSignals := Counter())(
             p("Count: ", span(id := "count", dataText := Counter.count)),
             button(dataOn("click") := incrementAction)("Increment")
         )

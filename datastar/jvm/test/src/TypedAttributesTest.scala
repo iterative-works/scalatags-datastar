@@ -5,7 +5,6 @@ package works.iterative.scalatags.datastar
 import utest.*
 import scalatags.Text.all.*
 import Datastar.*
-import Expr.*
 
 object TypedAttributesTest extends TestSuite:
 

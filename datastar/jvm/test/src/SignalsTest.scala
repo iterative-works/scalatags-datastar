@@ -5,7 +5,6 @@ package works.iterative.scalatags.datastar
 import utest.*
 import scalatags.Text.all.*
 import Datastar.*
-import Expr.*
 
 final case class Counter(count: Int = 0, step: Int = 1) derives Signals
 object Counter extends Signals.Handles[Counter]:
@@ -35,6 +34,16 @@ object SignalsTest extends TestSuite:
             assert(
               div(dataSignals := Signals.encode(Counter())).render
                   == """<div data-signals="{count: 0, step: 1}"></div>"""
+            )
+
+        test("dataSignals binds a typed model directly, no encode call"):
+            assert(
+              div(dataSignals := Counter()).render
+                  == """<div data-signals="{count: 0, step: 1}"></div>"""
+            )
+            assert(
+              div(dataSignals := Search("milk", 3)).render
+                  == """<div data-signals="{query: 'milk', page: 3}"></div>"""
             )
 
         test("companion handles render as signal references"):
