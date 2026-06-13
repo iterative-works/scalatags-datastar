@@ -188,30 +188,45 @@ the codec module.
 
 ### Example app (`scenarios`, JVM)
 
-A runnable dogfood app on the house stack — ZIO + http4s (Blaze) + Tapir — puts every layer together
-(Phase 5, in progress). It is a small **examples gallery**, modelled on
-[data-star.dev/examples](https://data-star.dev/examples): a sidebar navigates between demos, and each
-demo runs **beside the typed Scala that produces it**. The source panels are read at runtime from the
-very files that compiled — delimited by `// snippet:` regions — so a shown excerpt can never drift
-from the code that runs; they are syntax-highlighted client-side by a pinned highlight.js build.
+A runnable dogfood app on the house stack — ZIO + http4s (Blaze) + Tapir — puts every layer together.
+It is an **examples gallery** that reimplements the official
+[data-star.dev/examples](https://data-star.dev/examples) with these typed bindings: a sidebar
+navigates between demos, and each demo runs **beside the typed Scala that produces it**. The source
+panels are read at runtime from the very files that compiled — delimited by `// snippet:` regions — so
+a shown excerpt can never drift from the code that runs; they are syntax-highlighted client-side by a
+pinned highlight.js build.
 
-- **Server-driven counter** (`/examples/counter`): the page binds a `Counter` case class to the
-  signal store and a reverse-routed `@post('/increment')` button; the server decodes the
-  round-tripped store with `readSignals`, advances it, and streams a `patch-signals` SSE event built
-  by the codec. The signal store rides in the request body — never a typed endpoint input — so the
-  template action and the handler share one route definition and cannot drift.
-- **Live search** (`/examples/search`): a debounced `data-on:input` fires a reverse-routed
-  `@get('/search/results')`; the server decodes the store, filters a catalogue, and streams a
-  `patch-elements` event. One `results(matches)` fragment renders both the initial list and every
-  patch, so they cannot diverge — the symmetry the library is built for. A `@get` action carries the
-  signals in a `datastar` query parameter (not a body), which the server endpoint decodes through the
-  same `readSignals`.
+**26 of the 27 core examples are reimplemented** (every one but `match_media`, which needs the
+deferred Datastar Pro `data-match-media` attribute), proving the typed surface end to end. Each follows
+the same store / view / endpoints / handler shape as the counter and search, and a new example is a
+single registry entry. By the behaviour they exercise:
+
+- **Stateless round trips** — `active-search`, `lazy-load`, `lazy-tabs` (a typed `Int` path action),
+  `title-update` (a `<title>` patch by selector), `inline-validation`, `form-data` (`ActionOptions.form`
+  + a Tapir `formBody`).
+- **Pagination** — `click-to-load`, `infinite-scroll`: the offset rides the signal store; append-mode
+  patches and a `data-on-intersect.once` sentinel.
+- **Server feeds over time** — `progress-bar`, `progressive-load`, `bad-apple`, `dbmon`: the `ZStream`
+  form of `datastarStream` streams events on the server's own schedule.
+- **Mutable collections** — `delete-row`, `edit-row`, `bulk-update`, `todomvc`: an in-memory
+  `Repository[Id, T]` over a ZIO `Ref`, exercising `@post`/`@put`/`@delete`, remove/inner/append
+  patching, and granular per-region updates.
+- **Single records** — `click-to-edit` (the `@patch` verb, a `_fetching` indicator), `templ-counter`
+  (a shared count), `svg-morphing` (a `namespace = svg` patch).
+- **Client-side** — `custom-event`, `event-bubbling`, `web-component`, `on-signal-patch`,
+  `custom-plugin`, `sortable`: `data-on`/`data-attr`/`data-bind`/`data-on-signal-patch` driving the
+  browser, including third-party-JS integration points.
+
+Together they cover every verb (`@get`/`@post`/`@put`/`@patch`/`@delete`), both request channels (the
+signal store via the `@post`/`@put` body or the `@get`/`@delete` `datastar` query parameter, and the
+form-encoded `formBody`), the typed `Expr` DSL, and every SSE patch mode.
 
 ```bash
 ./mill scenarios.run        # serves the gallery; set PORT to override 8080
-#   http://localhost:8080/                   — gallery home
-#   http://localhost:8080/examples/counter   — counter
-#   http://localhost:8080/examples/search    — live search
+#   http://localhost:8080/                          — gallery home (every demo)
+#   http://localhost:8080/examples/counter          — server-driven counter
+#   http://localhost:8080/examples/todomvc          — TodoMVC
+#   http://localhost:8080/examples/click-to-edit    — click to edit … and 23 more
 ```
 
 ## Build

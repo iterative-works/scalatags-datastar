@@ -56,6 +56,13 @@ object ScenariosRoutesTest extends TestSuite:
             val (response, _) = call(Request[F](Method.GET, uri"/examples/nope"))
             assert(response.status.code == 404)
 
+        test("every gallery demo page renders with all its snippet regions resolved"):
+            Demos.all.foreach: demo =>
+                val request = Request[F](Method.GET, Uri.unsafeFromString(s"/examples/${demo.id}"))
+                val (response, body) = call(request)
+                assert(response.status.code == 200)
+                assert(body.contains("""class="language-scala""""))
+
         test("POST /increment serves the counter action"):
             val request = Request[F](Method.POST, uri"/increment")
                 .withEntity("""{"count":0,"step":1}""")

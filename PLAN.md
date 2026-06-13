@@ -185,8 +185,22 @@ like `scalatags-webawesome`.
   client-side by a pinned highlight.js (**11.11.1**) + Scala grammar, the second deliberately-pinned
   CDN asset beside the Datastar client. Validated by unit (`SourcesTest` region/dedent, `GalleryViewTest`
   chrome), integration (`ScenariosRoutesTest` proves source is read *through* a route) and end-to-end
-  (`GalleryE2ETest`) tests. *Remaining:* more canonical examples (todo, click-to-edit, polling, SSE
-  feed), llms.txt, contributing.
+  (`GalleryE2ETest`) tests.
+  **Fourth slice DONE — the full examples gallery:** the gallery now reimplements **26 of the 27
+  core data-star.dev examples** (every one but `match_media`, which needs the deferred Pro
+  `data-match-media` attribute). Built in TDD batches, each example follows the established store /
+  view / endpoints / handler shape plus a `Demos` entry and snippet regions, with view-unit and
+  in-process routes-integration tests (the shared `ScenariosRoutesTest` verifies store state after
+  each mutation, with `reset()` bookends). New library pieces this required: the over-time
+  `datastarStream(ZStream[String])` feed overload in `tapirsse` (for `progress-bar`/`progressive-load`/
+  `bad-apple`/`dbmon`), and two scenario-local state abstractions — `Repository[Id, T]` over a ZIO
+  `Ref` (shared by `delete-row`/`edit-row`/`bulk-update`/`todomvc`) and its single-record sibling
+  `Cell[A]` (shared by `click-to-edit`/`templ-counter`/`dbmon`), each created eagerly at construction
+  so handlers stay on the `Any` environment and the interpreter is untouched. Stateful list demos
+  lazy-load their rows via `data-init` so a reload reflects the live store. Together the examples
+  cover every action verb, both request channels plus `formBody`, the `Expr` DSL, and every SSE patch
+  mode. *Remaining:* `match_media` (a ~10-line `DatastarPro` `dataMatchMedia` binding, if the gallery
+  is to advertise Pro support), llms.txt, contributing.
 - **Phase 6 (optional).** Generate SSE constants/enums from `datastar-sdk-config.json`. Component
   codegen is *not* warranted — the attribute set is small and stable (YAGNI).
 
