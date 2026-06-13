@@ -145,6 +145,30 @@ object ScenariosRoutesTest extends TestSuite:
             val response = respond(request)
             assert(response.status.code == 400)
 
+        test("GET /click-to-load/more appends the next page and advances the offset"):
+            val request = Request[F](
+                Method.GET,
+                uri"/click-to-load/more".withQueryParam("datastar", """{"offset":10}""")
+            )
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("Agent 11"))
+            assert(body.contains("data: mode append"))
+            assert(body.contains("""data: signals {"offset":20}"""))
+
+        test("GET /infinite-scroll/more appends a page and re-arms the sentinel"):
+            val request = Request[F](
+                Method.GET,
+                uri"/infinite-scroll/more".withQueryParam("datastar", """{"offset":10}""")
+            )
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("Agent 11"))
+            assert(body.contains("data-on-intersect__once"))
+            assert(body.contains("""data: signals {"offset":20}"""))
+
     end tests
 
 end ScenariosRoutesTest

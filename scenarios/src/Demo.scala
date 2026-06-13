@@ -136,6 +136,38 @@ object Demos:
         )
     )
 
+    val clickToLoad: Demo = Demo(
+        id = "click-to-load",
+        title = "Click to load",
+        blurb = "A Load-more button appends the next page of rows and patches the offset signal " +
+            "forward, so the stateless server picks up where the last click left off.",
+        widget = ClickToLoadView.demo,
+        snippets = Seq(
+            SnippetRef("The signal store", "ClickToLoad.scala", "click-to-load-store"),
+            SnippetRef("The template", "ClickToLoadView.scala", "click-to-load-view"),
+            SnippetRef("The endpoints", "ClickToLoadEndpoints.scala", "click-to-load-endpoints"),
+            SnippetRef("The SSE handler", "ClickToLoadServer.scala", "click-to-load-server")
+        )
+    )
+
+    val infiniteScroll: Demo = Demo(
+        id = "infinite-scroll",
+        title = "Infinite scroll",
+        blurb = "A sentinel with data-on-intersect.once fetches the next page as it scrolls into " +
+            "view; the server re-arms a fresh sentinel each time until the list is exhausted.",
+        widget = InfiniteScrollView.demo,
+        snippets = Seq(
+            SnippetRef("The signal store", "InfiniteScroll.scala", "infinite-scroll-store"),
+            SnippetRef("The template", "InfiniteScrollView.scala", "infinite-scroll-view"),
+            SnippetRef(
+                "The endpoints",
+                "InfiniteScrollEndpoints.scala",
+                "infinite-scroll-endpoints"
+            ),
+            SnippetRef("The SSE handler", "InfiniteScrollServer.scala", "infinite-scroll-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -144,7 +176,9 @@ object Demos:
         lazyTabs,
         titleUpdate,
         progressBar,
-        progressiveLoad
+        progressiveLoad,
+        clickToLoad,
+        infiniteScroll
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)

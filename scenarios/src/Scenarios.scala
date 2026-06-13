@@ -24,7 +24,9 @@ object Scenarios:
             LazyTabsServer.serverEndpoints ++
             TitleUpdateServer.serverEndpoints ++
             ProgressBarServer.serverEndpoints ++
-            ProgressiveLoadServer.serverEndpoints
+            ProgressiveLoadServer.serverEndpoints ++
+            ClickToLoadServer.serverEndpoints ++
+            InfiniteScrollServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)
