@@ -4,7 +4,7 @@ package works.iterative.scalatags.datastar.tapir.sse
 
 import utest.*
 import zio.*
-import zio.stream.Stream
+import zio.stream.{Stream, ZStream}
 import java.nio.charset.StandardCharsets.UTF_8
 
 object DatastarEventsTest extends TestSuite:
@@ -26,6 +26,15 @@ object DatastarEventsTest extends TestSuite:
             val a = "event: a\n\n"
             val b = "event: b\n\n"
             assert(bytesOf(datastarStream(a, b)).sameElements((a + b).getBytes(UTF_8)))
+
+        test("a stream of events becomes their bytes, in emission order"):
+            val a = "event: a\ndata: signals {\"n\":1}\n\n"
+            val b = "event: b\ndata: signals {\"n\":2}\n\n"
+            val stream = datastarStream(ZStream(a, b))
+            assert(bytesOf(stream).sameElements((a + b).getBytes(UTF_8)))
+
+        test("an empty stream yields no bytes"):
+            assert(bytesOf(datastarStream(ZStream.empty)).isEmpty)
 
     end tests
 

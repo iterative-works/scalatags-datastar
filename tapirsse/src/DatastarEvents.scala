@@ -27,6 +27,15 @@ val datastarEvents: StreamBodyIO[Stream[Throwable, Byte], Stream[Throwable, Byte
 def datastarStream(events: String*): Stream[Throwable, Byte] =
     ZStream.fromChunk(Chunk.fromArray(events.mkString.getBytes(UTF_8)))
 
+/** The response body for a [[datastarEvents]] output from a stream of events produced *over time*:
+  * each rendered SSE event string becomes its UTF-8 bytes as the stream emits it, preserving the
+  * pacing. This is the feed form of [[datastarStream]] — a handler that streams progress updates, a
+  * clock, or any open-ended sequence returns `ZIO.succeed(datastarStream(events))` where `events`
+  * emits on its own schedule, rather than collecting every event up front as the varargs form does.
+  */
+def datastarStream(events: ZStream[Any, Throwable, String]): Stream[Throwable, Byte] =
+    events.mapConcatChunk(event => Chunk.fromArray(event.getBytes(UTF_8)))
+
 /** The SSE codec a server handler builds its events with, re-exported so the server side is reached
   * through this one import: [[works.iterative.scalatags.datastar.sse.ServerSentEvents]] renders the
   * events, [[works.iterative.scalatags.datastar.sse.ElementPatchMode]] selects a patch strategy,
