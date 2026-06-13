@@ -247,6 +247,48 @@ object ScenariosRoutesTest extends TestSuite:
             assert(run(Accounts.repo.all).filter(_.active).map(_.id).sorted == Vector(1L, 3L))
             run(Accounts.repo.reset())
 
+        test("GET /todomvc/list renders the seeded todos and the count"):
+            run(Todos.repo.reset())
+            val request = Request[F](
+                Method.GET,
+                uri"/todomvc/list".withQueryParam("datastar", """{"input":"","mode":"all"}""")
+            )
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("data: mode inner"))
+            assert(body.contains("Taste Datastar"))
+            assert(body.contains("items left"))
+
+        test("POST /todomvc/add adds a todo to the store and clears the input"):
+            run(Todos.repo.reset())
+            val request = Request[F](Method.POST, uri"/todomvc/add")
+                .withEntity("""{"input":"Write the docs","mode":"all"}""")
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(body.contains("Write the docs"))
+            assert(body.contains("""data: signals {"input":""}"""))
+            assert(run(Todos.repo.all).exists(_.text == "Write the docs"))
+            run(Todos.repo.reset())
+
+        test("PUT /todomvc/{id}/toggle flips a todo's completion in the store"):
+            run(Todos.repo.reset())
+            val request = Request[F](Method.PUT, uri"/todomvc/2/toggle")
+                .withEntity("""{"input":"","mode":"all"}""")
+            val (response, _) = call(request)
+            assert(response.status.code == 200)
+            assert(run(Todos.repo.get(2L)).exists(_.completed))
+            run(Todos.repo.reset())
+
+        test("PUT /todomvc/clear-completed removes the completed todos"):
+            run(Todos.repo.reset())
+            val request = Request[F](Method.PUT, uri"/todomvc/clear-completed")
+                .withEntity("""{"input":"","mode":"all"}""")
+            val (response, _) = call(request)
+            assert(response.status.code == 200)
+            assert(run(Todos.repo.all).forall(!_.completed))
+            run(Todos.repo.reset())
+
     end tests
 
 end ScenariosRoutesTest

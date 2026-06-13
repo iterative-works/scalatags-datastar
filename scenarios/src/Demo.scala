@@ -246,6 +246,20 @@ object Demos:
         )
     )
 
+    val todomvc: Demo = Demo(
+        id = "todomvc",
+        title = "TodoMVC",
+        blurb = "The canonical TodoMVC: add/toggle/delete/toggle-all/clear over a server todo " +
+            "repository, with client filter signals; each action patches the list and count granularly.",
+        widget = TodoMvcView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "TodoMvc.scala", "todomvc-store"),
+            SnippetRef("The template", "TodoMvcView.scala", "todomvc-view"),
+            SnippetRef("The endpoints", "TodoMvcEndpoints.scala", "todomvc-endpoints"),
+            SnippetRef("The SSE handlers", "TodoMvcServer.scala", "todomvc-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -261,7 +275,8 @@ object Demos:
         formData,
         deleteRow,
         editRow,
-        bulkUpdate
+        bulkUpdate,
+        todomvc
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)
