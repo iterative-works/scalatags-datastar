@@ -331,6 +331,41 @@ object ScenariosRoutesTest extends TestSuite:
             assert(countBody.contains(">2<"))
             run(GlobalCounter.cell.reset())
 
+        test("POST /file-upload/submit reports the count and size of the base64 files"):
+            val request = Request[F](Method.POST, uri"/file-upload/submit")
+                .withEntity("""{"upload":["aGVsbG8=","d29ybGQ="]}""")
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("Received 2 file(s)"))
+
+        test("POST /file-upload/submit with no files says so"):
+            val request = Request[F](Method.POST, uri"/file-upload/submit")
+                .withEntity("""{"upload":[]}""")
+            val (_, body) = call(request)
+            assert(body.contains("No files selected."))
+
+        test("GET /bad-apple/play opens an event-stream feed"):
+            val response = respond(Request[F](Method.GET, uri"/bad-apple/play"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+
+        test("GET /dbmon/updates opens an event-stream feed"):
+            val request = Request[F](
+                Method.GET,
+                uri"/dbmon/updates".withQueryParam("datastar", """{"fps":4,"mutationRate":40}""")
+            )
+            val response = respond(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+
+        test("GET /dbmon/updates with a datastar param that does not fit is a 400"):
+            val request = Request[F](
+                Method.GET,
+                uri"/dbmon/updates".withQueryParam("datastar", "not json")
+            )
+            assert(respond(request).status.code == 400)
+
     end tests
 
 end ScenariosRoutesTest

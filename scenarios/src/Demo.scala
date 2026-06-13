@@ -350,6 +350,59 @@ object Demos:
         snippets = Seq(SnippetRef("The template", "CustomPluginView.scala", "custom-plugin-view"))
     )
 
+    val sortable: Demo = Demo(
+        id = "sortable",
+        title = "Sortable",
+        blurb = "data-init wires SortableJS to make the list draggable and dispatch a reordered " +
+            "event; data-on:reordered reads the new order into a signal. Client-only.",
+        widget = SortableView.demo,
+        snippets = Seq(SnippetRef("The template", "SortableView.scala", "sortable-view"))
+    )
+
+    val fileUpload: Demo = Demo(
+        id = "file-upload",
+        title = "File upload",
+        blurb =
+            "data-bind base64-encodes the chosen files into the signal store; the Upload button " +
+                "@posts them and the server reports the count and size.",
+        widget = FileUploadView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "FileUpload.scala", "file-upload-store"),
+            SnippetRef("The template", "FileUploadView.scala", "file-upload-view"),
+            SnippetRef("The endpoints", "FileUploadEndpoints.scala", "file-upload-endpoints"),
+            SnippetRef("The SSE handler", "FileUploadServer.scala", "file-upload-server")
+        )
+    )
+
+    val badApple: Demo = Demo(
+        id = "bad-apple",
+        title = "Bad apple",
+        blurb = "A one-way feed plays a tiny ASCII animation, one patch-elements per frame — the " +
+            "same server-driven video pattern the original uses, scaled down.",
+        widget = BadAppleView.demo,
+        snippets = Seq(
+            SnippetRef("The frames", "BadApple.scala", "bad-apple-frames"),
+            SnippetRef("The template", "BadAppleView.scala", "bad-apple-view"),
+            SnippetRef("The endpoints", "BadAppleEndpoints.scala", "bad-apple-endpoints"),
+            SnippetRef("The SSE handler", "BadAppleServer.scala", "bad-apple-server")
+        )
+    )
+
+    val dbmon: Demo = Demo(
+        id = "dbmon",
+        title = "DBmon",
+        blurb =
+            "A benchmark: the server streams rapid table updates at a client-controlled frame " +
+                "rate, re-randomising a fraction of the rows each frame.",
+        widget = DbmonView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "Dbmon.scala", "dbmon-store"),
+            SnippetRef("The template", "DbmonView.scala", "dbmon-view"),
+            SnippetRef("The endpoints", "DbmonEndpoints.scala", "dbmon-endpoints"),
+            SnippetRef("The SSE handler", "DbmonServer.scala", "dbmon-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -374,7 +427,11 @@ object Demos:
         eventBubbling,
         webComponent,
         onSignalPatch,
-        customPlugin
+        customPlugin,
+        sortable,
+        fileUpload,
+        badApple,
+        dbmon
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)
