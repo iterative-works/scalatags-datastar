@@ -169,6 +169,39 @@ object ScenariosRoutesTest extends TestSuite:
             assert(body.contains("data-on-intersect__once"))
             assert(body.contains("""data: signals {"offset":20}"""))
 
+        test("POST /inline-validation/validate patches each field's error from the store"):
+            val request = Request[F](Method.POST, uri"/inline-validation/validate")
+                .withEntity("""{"email":"nope","firstName":"","lastName":""}""")
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("valid email"))
+            assert(body.contains("required"))
+
+        test("POST /inline-validation/submit succeeds for a valid form"):
+            val request = Request[F](Method.POST, uri"/inline-validation/submit")
+                .withEntity("""{"email":"fresh@example.com","firstName":"Jo","lastName":"Lee"}""")
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(body.contains("Thanks for signing up"))
+
+        test("POST /inline-validation/submit re-shows errors for an invalid form"):
+            val request = Request[F](Method.POST, uri"/inline-validation/submit")
+                .withEntity("""{"email":"","firstName":"","lastName":""}""")
+            val (_, body) = call(request)
+            assert(body.contains("required"))
+            assert(!body.contains("Thanks for signing up"))
+
+        test("POST /form-data/submit reads the form-encoded fields and echoes them"):
+            val request = Request[F](Method.POST, uri"/form-data/submit")
+                .withEntity(UrlForm("name" -> "Pizza", "toppings" -> "cheese", "toppings" -> "onion"))
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("name = Pizza"))
+            assert(body.contains("toppings = cheese"))
+            assert(body.contains("toppings = onion"))
+
     end tests
 
 end ScenariosRoutesTest

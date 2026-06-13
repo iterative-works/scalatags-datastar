@@ -26,7 +26,9 @@ object Scenarios:
             ProgressBarServer.serverEndpoints ++
             ProgressiveLoadServer.serverEndpoints ++
             ClickToLoadServer.serverEndpoints ++
-            InfiniteScrollServer.serverEndpoints
+            InfiniteScrollServer.serverEndpoints ++
+            InlineValidationServer.serverEndpoints ++
+            FormDataServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)

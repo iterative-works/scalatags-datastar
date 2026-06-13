@@ -168,6 +168,41 @@ object Demos:
         )
     )
 
+    val inlineValidation: Demo = Demo(
+        id = "inline-validation",
+        title = "Inline validation",
+        blurb = "Each field validates server-side on a debounced keystroke; the handler patches " +
+            "every field's error element, and submit either re-shows them or replaces the form.",
+        widget = InlineValidationView.demo,
+        snippets = Seq(
+            SnippetRef("The store & rules", "InlineValidation.scala", "inline-validation-store"),
+            SnippetRef("The template", "InlineValidationView.scala", "inline-validation-view"),
+            SnippetRef(
+                "The endpoints",
+                "InlineValidationEndpoints.scala",
+                "inline-validation-endpoints"
+            ),
+            SnippetRef(
+                "The SSE handler",
+                "InlineValidationServer.scala",
+                "inline-validation-server"
+            )
+        )
+    )
+
+    val formData: Demo = Demo(
+        id = "form-data",
+        title = "Form data",
+        blurb = "The submit action carries {contentType: 'form'}, so Datastar sends the form's " +
+            "fields form-encoded instead of the signal store; the server reads them with formBody.",
+        widget = FormDataView.demo,
+        snippets = Seq(
+            SnippetRef("The template", "FormDataView.scala", "form-data-view"),
+            SnippetRef("The endpoints", "FormDataEndpoints.scala", "form-data-endpoints"),
+            SnippetRef("The SSE handler", "FormDataServer.scala", "form-data-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -178,7 +213,9 @@ object Demos:
         progressBar,
         progressiveLoad,
         clickToLoad,
-        infiniteScroll
+        infiniteScroll,
+        inlineValidation,
+        formData
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)
