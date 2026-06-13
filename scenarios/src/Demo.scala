@@ -203,6 +203,20 @@ object Demos:
         )
     )
 
+    val deleteRow: Demo = Demo(
+        id = "delete-row",
+        title = "Delete row",
+        blurb = "A table backed by a server repository; each row's Delete button guards a typed " +
+            "@delete with confirm(), and the server patches the row out by id (mode=remove).",
+        widget = DeleteRowView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "DeleteRow.scala", "delete-row-store"),
+            SnippetRef("The template", "DeleteRowView.scala", "delete-row-view"),
+            SnippetRef("The endpoints", "DeleteRowEndpoints.scala", "delete-row-endpoints"),
+            SnippetRef("The SSE handler", "DeleteRowServer.scala", "delete-row-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -215,7 +229,8 @@ object Demos:
         clickToLoad,
         infiniteScroll,
         inlineValidation,
-        formData
+        formData,
+        deleteRow
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)

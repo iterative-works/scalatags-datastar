@@ -28,7 +28,8 @@ object Scenarios:
             ClickToLoadServer.serverEndpoints ++
             InfiniteScrollServer.serverEndpoints ++
             InlineValidationServer.serverEndpoints ++
-            FormDataServer.serverEndpoints
+            FormDataServer.serverEndpoints ++
+            DeleteRowServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)

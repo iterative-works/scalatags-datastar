@@ -202,6 +202,24 @@ object ScenariosRoutesTest extends TestSuite:
             assert(body.contains("toppings = cheese"))
             assert(body.contains("toppings = onion"))
 
+        test("GET /delete-row/rows renders the current members into the table body"):
+            run(Members.repo.reset())
+            val (response, body) = call(Request[F](Method.GET, uri"/delete-row/rows"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("data: mode inner"))
+            assert(body.contains("Joe Smith"))
+
+        test("DELETE /delete-row/{id} removes the member from the store"):
+            run(Members.repo.reset())
+            val (deleted, deleteBody) = call(Request[F](Method.DELETE, uri"/delete-row/2"))
+            assert(deleted.status.code == 200)
+            assert(deleteBody.contains("data: mode remove"))
+            assert(deleteBody.contains("selector #member-2"))
+            val (_, rowsBody) = call(Request[F](Method.GET, uri"/delete-row/rows"))
+            assert(!rowsBody.contains("Angie MacDowell"))
+            run(Members.repo.reset())
+
     end tests
 
 end ScenariosRoutesTest
