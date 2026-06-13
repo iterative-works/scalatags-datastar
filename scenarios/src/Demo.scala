@@ -288,6 +288,68 @@ object Demos:
         )
     )
 
+    val templCounter: Demo = Demo(
+        id = "templ-counter",
+        title = "Templ counter",
+        blurb = "A counter held on the server and shared by every visitor — open two tabs and watch " +
+            "both advance. Per-user counters need a session, which is outside the binding's scope.",
+        widget = TemplCounterView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "TemplCounter.scala", "templ-counter-store"),
+            SnippetRef("The template", "TemplCounterView.scala", "templ-counter-view"),
+            SnippetRef("The endpoints", "TemplCounterEndpoints.scala", "templ-counter-endpoints"),
+            SnippetRef("The SSE handlers", "TemplCounterServer.scala", "templ-counter-server")
+        )
+    )
+
+    val customEvent: Demo = Demo(
+        id = "custom-event",
+        title = "Custom event",
+        blurb = "A button dispatches a bubbling CustomEvent that a container's data-on:notify " +
+            "catches — data-on listens for any DOM event, custom ones included. Client-only.",
+        widget = CustomEventView.demo,
+        snippets = Seq(SnippetRef("The template", "CustomEventView.scala", "custom-event-view"))
+    )
+
+    val eventBubbling: Demo = Demo(
+        id = "event-bubbling",
+        title = "Event bubbling",
+        blurb = "One data-on:click on the list reads evt.target to tell which item was clicked, " +
+            "instead of a handler per item. Client-only.",
+        widget = EventBubblingView.demo,
+        snippets = Seq(SnippetRef("The template", "EventBubblingView.scala", "event-bubbling-view"))
+    )
+
+    val webComponent: Demo = Demo(
+        id = "web-component",
+        title = "Web component",
+        blurb =
+            "data-attr binds a signal onto a custom element's attribute, so a bound input drives " +
+                "the component reactively. Client-only (the element is defined inline).",
+        widget = WebComponentView.demo,
+        snippets = Seq(SnippetRef("The template", "WebComponentView.scala", "web-component-view"))
+    )
+
+    val onSignalPatch: Demo = Demo(
+        id = "on-signal-patch",
+        title = "On signal patch",
+        blurb = "data-on-signal-patch runs an expression whenever the store changes; " +
+            "data-json-signals__terse shows the live store. Client-only.",
+        widget = OnSignalPatchView.demo,
+        snippets =
+            Seq(SnippetRef("The template", "OnSignalPatchView.scala", "on-signal-patch-view"))
+    )
+
+    val customPlugin: Demo = Demo(
+        id = "custom-plugin",
+        title = "Custom plugin",
+        blurb =
+            "A data-on expression calls hand-written JavaScript — the typed bindings render the " +
+                "trigger, but the custom behaviour is plain JS beyond the boundary. Client-only.",
+        widget = CustomPluginView.demo,
+        snippets = Seq(SnippetRef("The template", "CustomPluginView.scala", "custom-plugin-view"))
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -306,7 +368,13 @@ object Demos:
         bulkUpdate,
         todomvc,
         clickToEdit,
-        svgMorphing
+        svgMorphing,
+        templCounter,
+        customEvent,
+        eventBubbling,
+        webComponent,
+        onSignalPatch,
+        customPlugin
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)

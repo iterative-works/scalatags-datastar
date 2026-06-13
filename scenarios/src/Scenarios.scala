@@ -34,7 +34,8 @@ object Scenarios:
             BulkUpdateServer.serverEndpoints ++
             TodoMvcServer.serverEndpoints ++
             ClickToEditServer.serverEndpoints ++
-            SvgMorphingServer.serverEndpoints
+            SvgMorphingServer.serverEndpoints ++
+            TemplCounterServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)

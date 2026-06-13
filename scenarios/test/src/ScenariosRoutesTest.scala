@@ -320,6 +320,17 @@ object ScenariosRoutesTest extends TestSuite:
             assert(body.contains("data: namespace svg"))
             assert(body.contains("<circle"))
 
+        test("POST /templ-counter/increment advances the shared count"):
+            run(GlobalCounter.cell.reset())
+            val (first, firstBody) = call(Request[F](Method.POST, uri"/templ-counter/increment"))
+            assert(first.status.code == 200)
+            assert(firstBody.contains(">1<"))
+            call(Request[F](Method.POST, uri"/templ-counter/increment"))
+            assert(run(GlobalCounter.cell.get) == 2)
+            val (_, countBody) = call(Request[F](Method.GET, uri"/templ-counter/count"))
+            assert(countBody.contains(">2<"))
+            run(GlobalCounter.cell.reset())
+
     end tests
 
 end ScenariosRoutesTest
