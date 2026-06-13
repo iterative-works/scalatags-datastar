@@ -35,7 +35,7 @@ object ScenariosRoutesTest extends TestSuite:
             val (response, body) = call(Request[F](Method.GET, uri"/"))
             assert(response.status.code == 200)
             assert(body.contains("""href="/examples/counter""""))
-            assert(body.contains("""href="/examples/search""""))
+            assert(body.contains("""href="/examples/active-search""""))
 
         test("GET /examples/counter serves the counter demo beside its source"):
             val (response, body) = call(Request[F](Method.GET, uri"/examples/counter"))
@@ -46,10 +46,10 @@ object ScenariosRoutesTest extends TestSuite:
             assert(body.contains("""class="language-scala""""))
             assert(body.contains("final case class Counter"))
 
-        test("GET /examples/search serves the live-search demo, not the counter"):
-            val (response, body) = call(Request[F](Method.GET, uri"/examples/search"))
+        test("GET /examples/active-search serves the active-search demo, not the counter"):
+            val (response, body) = call(Request[F](Method.GET, uri"/examples/active-search"))
             assert(response.status.code == 200)
-            assert(body.contains("""data-bind="query""""))
+            assert(body.contains("""data-bind="search""""))
             assert(!body.contains("""@post('/increment')"""))
 
         test("GET /examples/{unknown} is a 404"):
@@ -70,25 +70,16 @@ object ScenariosRoutesTest extends TestSuite:
             assert(response.status.code == 200)
             assert(response.contentType.exists(_.mediaType == MediaType.`text/event-stream`))
 
-        test("GET /search/results serves the search action"):
-            val request = Request[F](
-                Method.GET,
-                uri"/search/results".withQueryParam("datastar", """{"query":"go"}""")
-            )
-            val (response, _) = call(request)
-            assert(response.status.code == 200)
-            assert(response.contentType.exists(_.mediaType == MediaType.`text/event-stream`))
-
         test("POST /increment with a body that does not fit the store is a 400"):
             val request = Request[F](Method.POST, uri"/increment")
                 .withEntity("""{"count":"nope"}""")
             val (response, _) = call(request)
             assert(response.status.code == 400)
 
-        test("GET /search/results with a datastar param that does not fit the store is a 400"):
+        test("GET /active-search/search with a datastar param that does not fit the store is a 400"):
             val request = Request[F](
                 Method.GET,
-                uri"/search/results".withQueryParam("datastar", "not json")
+                uri"/active-search/search".withQueryParam("datastar", "not json")
             )
             val (response, _) = call(request)
             assert(response.status.code == 400)
@@ -338,9 +329,13 @@ object ScenariosRoutesTest extends TestSuite:
             assert(countBody.contains(">2<"))
             run(GlobalCounter.cell.reset())
 
-        test("POST /file-upload/submit reports the count and size of the base64 files"):
+        test("POST /file-upload/submit reports the count and size of the uploaded files"):
             val request = Request[F](Method.POST, uri"/file-upload/submit")
-                .withEntity("""{"upload":["aGVsbG8=","d29ybGQ="]}""")
+                .withEntity(
+                    """{"upload":[""" +
+                        """{"name":"a.txt","contents":"aGVsbG8=","mime":"text/plain"},""" +
+                        """{"name":"b.txt","contents":"d29ybGQ=","mime":"text/plain"}]}"""
+                )
             val (response, body) = call(request)
             assert(response.status.code == 200)
             assert(isEventStream(response))

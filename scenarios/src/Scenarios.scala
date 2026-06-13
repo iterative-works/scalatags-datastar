@@ -18,7 +18,6 @@ object Scenarios:
     val endpoints: List[ZServerEndpoint[Any, ZioStreams]] =
         GalleryServer.serverEndpoints ++
             CounterServer.serverEndpoints ++
-            SearchServer.serverEndpoints ++
             ActiveSearchServer.serverEndpoints ++
             LazyLoadServer.serverEndpoints ++
             LazyTabsServer.serverEndpoints ++

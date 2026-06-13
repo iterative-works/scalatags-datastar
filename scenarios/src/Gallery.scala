@@ -47,12 +47,59 @@ object Gallery:
           |  font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace; }
           |""".stripMargin
 
+    /** Presentation for the demo widgets themselves. The data-star.dev examples lean on the site's
+      * stylesheet for their component look; these rules give the embedded widgets the equivalent —
+      * progress bars, bar charts, scroll panes, cards, tables and form controls — so each demo
+      * reads the way it does on the official site. Everything is scoped under `.demo`, so it never
+      * reaches the sidebar chrome or the highlighted source panels.
+      */
+    private val demoStyles: String =
+        """
+          |.demo h3 { margin: 0 0 0.75rem; font-size: 1rem; }
+          |.demo > div > p, .demo p { margin: 0 0 0.75rem; }
+          |.demo ul { list-style: none; padding: 0; margin: 0; }
+          |.demo .muted, .demo .empty { color: #64748b; }
+          |.demo table { border-collapse: collapse; width: 100%; background: #fff; }
+          |.demo th, .demo td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #e2e8f0; text-align: left; }
+          |.demo thead th { font-size: 0.8rem; color: #475569; font-weight: 600; }
+          |.demo td.active { color: #16a34a; font-weight: 600; }
+          |.demo td.inactive { color: #94a3b8; }
+          |.demo input:not([type=checkbox]):not([type=radio]), .demo select, .demo textarea {
+          |  padding: 0.4rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; font: inherit; }
+          |.demo button { padding: 0.4rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.375rem;
+          |  background: #fff; cursor: pointer; font: inherit; }
+          |.demo button:hover { background: #f1f5f9; }
+          |.demo button.success { border-color: #16a34a; color: #166534; }
+          |.demo button.danger { border-color: #dc2626; color: #b91c1c; }
+          |.demo button.destroy { border: none; background: none; color: #dc2626; font-size: 1.1rem;
+          |  padding: 0 0.4rem; line-height: 1; }
+          |.demo .toolbar, .demo .actions, .demo .controls, .demo .filters {
+          |  display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem; }
+          |.demo .field { display: flex; flex-direction: column; gap: 0.25rem; margin-bottom: 0.75rem; max-width: 22rem; }
+          |.demo .error { color: #dc2626; font-size: 0.85rem; }
+          |.demo .progress { display: flex; align-items: center; gap: 0.75rem; }
+          |.demo .track { flex: 1; height: 1rem; background: #e2e8f0; border-radius: 0.5rem; overflow: hidden; }
+          |.demo .fill { height: 100%; background: #2563eb; transition: width 0.2s ease; }
+          |.demo .label { min-width: 3rem; font-variant-numeric: tabular-nums; color: #475569; }
+          |.demo .bars { display: flex; align-items: flex-end; gap: 0.5rem; height: 110px; padding-top: 0.5rem; }
+          |.demo .bar { width: 2.5rem; background: #2563eb; border-radius: 0.25rem 0.25rem 0 0; }
+          |.demo .scroller { max-height: 280px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 0.5rem; }
+          |.demo .sentinel { padding: 0.75rem; text-align: center; color: #64748b; }
+          |.demo .contact { display: flex; flex-direction: column; padding: 0.5rem 0.75rem; border-bottom: 1px solid #e2e8f0; }
+          |.demo .contact .email { color: #64748b; font-size: 0.85rem; }
+          |.demo .result { margin-top: 0.75rem; padding: 0.5rem 0.75rem; background: #eef2ff; border-radius: 0.375rem; color: #3730a3; }
+          |.demo .section { padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; margin-bottom: 0.5rem; background: #fff; }
+          |.demo .ascii { font-family: "JetBrains Mono", Menlo, Consolas, monospace; white-space: pre;
+          |  line-height: 1.05; font-size: 0.7rem; background: #0f172a; color: #e2e8f0; padding: 0.75rem; border-radius: 0.375rem; }
+          |.demo .flashable { font-weight: 600; }
+          |""".stripMargin
+
     private val headExtra: Frag = frag(
         link(rel := "stylesheet", href := hljsAsset("build/styles/github.min.css")),
         script(src := hljsAsset("build/highlight.min.js")),
         script(src := hljsAsset("build/languages/scala.min.js")),
         script(raw("document.addEventListener('DOMContentLoaded', () => hljs.highlightAll());")),
-        tag("style")(raw(styles))
+        tag("style")(raw(styles + demoStyles))
     )
 
     private def navLink(demo: Demo, active: Boolean): Frag =

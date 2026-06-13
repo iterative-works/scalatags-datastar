@@ -13,16 +13,14 @@ import works.iterative.scalatags.datastar.tapir.sse.*
   */
 object FileUploadServer:
 
-    /** The decoded byte size of a base64 string, dropping any `data:…;base64,` prefix. */
-    private def approxBytes(base64: String): Int =
-        val payload = base64.substring(base64.indexOf(",") + 1)
-        (payload.length * 3) / 4
+    /** The decoded byte size of a base64 payload, ignoring padding. */
+    private def approxBytes(base64: String): Int = (base64.length * 3) / 4
 
     // snippet: file-upload-server
     private val submitLogic: ZServerEndpoint[Any, ZioStreams] =
-        FileUploadEndpoints.submit.zServerLogic: upload =>
-            val count = upload.upload.size
-            val totalBytes = upload.upload.map(approxBytes).sum
+        FileUploadEndpoints.submit.zServerLogic: files =>
+            val count = files.upload.size
+            val totalBytes = files.upload.map(file => approxBytes(file.contents)).sum
             val message =
                 if count == 0 then "No files selected."
                 else s"Received $count file(s), about $totalBytes bytes."

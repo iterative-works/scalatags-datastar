@@ -19,8 +19,12 @@ object CustomPluginView:
     private val helper: String =
         """window.flash = (el) => {
           |  el.animate(
-          |    [{ background: 'gold' }, { background: 'transparent' }],
-          |    { duration: 600 }
+          |    [
+          |      { background: '#facc15', transform: 'scale(1.2)' },
+          |      { background: '#facc15', transform: 'scale(1.2)', offset: 0.25 },
+          |      { background: '', transform: 'scale(1)' }
+          |    ],
+          |    { duration: 700, easing: 'ease-out' }
           |  );
           |};""".stripMargin
 

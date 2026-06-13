@@ -8,11 +8,11 @@ import works.iterative.scalatags.datastar.tapir.*
 
 /** The bulk-update example's live fragment.
   *
-  * Each row's checkbox two-way binds an element of the `selections` array
-  * (`data-bind:selections[i]`, the array-index bind expressed with the string builder); the two
-  * buttons fire a reverse-routed `@put` that sends the whole selection in the signal body. The
-  * server flips the chosen accounts' status and re-renders the table. The table lazy-loads its rows
-  * on init, so a reload reflects the live store.
+  * Every row's checkbox two-way binds the *same* `selections` signal (`data-bind:selections`);
+  * Datastar collects a group of checkboxes sharing one signal into a boolean array, indexed by
+  * their DOM order. The two buttons fire a reverse-routed `@put` that sends the whole array in the
+  * signal body; the server flips the chosen accounts' status (same order) and re-renders the table.
+  * The table lazy-loads its rows on init, so a reload reflects the live store.
   */
 object BulkUpdateView:
 
@@ -21,12 +21,12 @@ object BulkUpdateView:
     private val deactivateAction: String = BulkUpdateEndpoints.deactivateRoute.action
 
     // snippet: bulk-update-view
-    /** One account row, keyed `account-{id}`; its checkbox binds `selections[index]` via
-      * data-bind's value form (the colon form's brackets are not a legal attribute name).
+    /** One account row, keyed `account-{id}`; its checkbox joins the shared `selections` array with
+      * `data-bind:selections` — Datastar slots each box into the array by render order.
       */
-    def row(account: Account, index: Int): Frag =
+    def row(account: Account): Frag =
         tr(id := s"account-${account.id}")(
-            td(input(`type` := "checkbox", dataBind := s"selections[$index]")),
+            td(input(`type` := "checkbox", dataBind("selections") := "")),
             td(account.name),
             td(account.email),
             td(cls := (if account.active then "active" else "inactive"))(
@@ -35,7 +35,7 @@ object BulkUpdateView:
         )
 
     def rows(accounts: Seq[Account]): Frag =
-        frag(accounts.zipWithIndex.map((account, index) => row(account, index)))
+        frag(accounts.map(row))
 
     val demo: Frag =
         div(dataSignals := "{selections: []}")(

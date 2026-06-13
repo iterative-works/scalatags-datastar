@@ -42,7 +42,7 @@ object GalleryE2ETest extends TestSuite:
                 assert(response.code.code == 200)
                 assert(response.contentType.exists(_.contains("text/html")))
                 assert(response.body.contains("""href="/examples/counter""""))
-                assert(response.body.contains("""href="/examples/search""""))
+                assert(response.body.contains("""href="/examples/active-search""""))
 
         test("GET /examples/counter serves the live demo and its highlighted source"):
             withServer: (port, backend) =>

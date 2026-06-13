@@ -31,7 +31,7 @@ object SignalsInputTest extends TestSuite:
     private val queryEcho: ZServerEndpoint[Any, Any] =
         endpoint.get
             .in("query")
-            .in(SignalsInput.query[Search])
+            .in(SignalsInput.query[ActiveSearch])
             .out(stringBody)
             .zServerLogic(search => ZIO.succeed(search.toString))
 
@@ -57,10 +57,10 @@ object SignalsInputTest extends TestSuite:
 
         test("query decodes the datastar parameter into the typed store"):
             val (response, body) = call(
-                Request[F](Method.GET, uri"/query".withQueryParam("datastar", """{"query":"go"}"""))
+                Request[F](Method.GET, uri"/query".withQueryParam("datastar", """{"search":"go"}"""))
             )
             assert(response.status.code == 200)
-            assert(body == Search("go").toString)
+            assert(body == ActiveSearch("go").toString)
 
         test("a datastar parameter that does not fit the store is a 400"):
             val (response, _) = call(

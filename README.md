@@ -196,10 +196,11 @@ panels are read at runtime from the very files that compiled — delimited by `/
 a shown excerpt can never drift from the code that runs; they are syntax-highlighted client-side by a
 pinned highlight.js build.
 
-**26 of the 27 core examples are reimplemented** (every one but `match_media`, which needs the
-deferred Datastar Pro `data-match-media` attribute), proving the typed surface end to end. Each follows
-the same store / view / endpoints / handler shape as the counter and search, and a new example is a
-single registry entry. By the behaviour they exercise:
+**26 of the 28 core examples are reimplemented** — every htmx-derived and client-side example on
+data-star.dev except `animations` and `match_media` (the latter needs the deferred Datastar Pro
+`data-match-media` attribute) — proving the typed surface end to end, alongside a from-scratch
+`counter` reference. Each follows the same store / view / endpoints / handler shape, and a new example
+is a single registry entry. By the behaviour they exercise:
 
 - **Stateless round trips** — `active-search`, `lazy-load`, `lazy-tabs` (a typed `Int` path action),
   `title-update` (a `<title>` patch by selector), `inline-validation`, `form-data` (`ActionOptions.form`

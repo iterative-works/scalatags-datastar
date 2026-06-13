@@ -17,14 +17,14 @@ object GalleryViewTest extends TestSuite:
 
         test("home lists every demo as a sidebar link"):
             assert(Gallery.home.contains("""href="/examples/counter""""))
-            assert(Gallery.home.contains("""href="/examples/search""""))
+            assert(Gallery.home.contains("""href="/examples/active-search""""))
             assert(Gallery.home.contains("Server-driven counter"))
-            assert(Gallery.home.contains("Live search"))
+            assert(Gallery.home.contains("Active search"))
 
         test("a demo page marks its own sidebar link active and leaves the others plain"):
             val html = Gallery.demoPage(Demos.counter, Seq.empty)
             assert(html.contains("""<a href="/examples/counter" class="active">"""))
-            assert(html.contains("""<a href="/examples/search">"""))
+            assert(html.contains("""<a href="/examples/active-search">"""))
 
         test("a demo page embeds the live widget"):
             val html = Gallery.demoPage(Demos.counter, Seq.empty)
@@ -42,9 +42,9 @@ object GalleryViewTest extends TestSuite:
             assert(html.contains("languages/scala.min.js"))
 
         test("a demo page shows the title and blurb"):
-            val html = Gallery.demoPage(Demos.search, Seq.empty)
-            assert(html.contains("Live search"))
-            assert(html.contains(Demos.search.blurb))
+            val html = Gallery.demoPage(Demos.activeSearch, Seq.empty)
+            assert(html.contains("Active search"))
+            assert(html.contains(Demos.activeSearch.blurb))
 
     end tests
 

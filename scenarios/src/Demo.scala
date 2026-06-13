@@ -35,20 +35,6 @@ object Demos:
         )
     )
 
-    val search: Demo = Demo(
-        id = "search",
-        title = "Live search",
-        blurb = "A debounced bound input fires a @get action carrying the signals; the server " +
-            "filters and patches the same results fragment the page first rendered.",
-        widget = SearchView.demo,
-        snippets = Seq(
-            SnippetRef("The signal store", "Search.scala", "search-store"),
-            SnippetRef("The template", "SearchView.scala", "search-view"),
-            SnippetRef("The endpoints", "SearchEndpoints.scala", "search-endpoints"),
-            SnippetRef("The SSE handler", "SearchServer.scala", "search-server")
-        )
-    )
-
     val activeSearch: Demo = Demo(
         id = "active-search",
         title = "Active search",
@@ -81,7 +67,8 @@ object Demos:
         id = "lazy-tabs",
         title = "Lazy tabs",
         blurb = "Clicking a tab fires @get('/lazy-tabs/{i}') with the index as a typed Int path " +
-            "parameter; the server returns the whole widget with that tab selected.",
+            "parameter; the server returns the whole widget with that tab selected. (Datastar always " +
+            "appends the signal store to a GET as ?datastar=… — there are no signals here, so it is {}.)",
         widget = LazyTabsView.demo,
         snippets = Seq(
             SnippetRef("The template", "LazyTabsView.scala", "lazy-tabs-view"),
@@ -405,7 +392,6 @@ object Demos:
 
     val all: Seq[Demo] = Seq(
         counter,
-        search,
         activeSearch,
         lazyLoad,
         lazyTabs,
