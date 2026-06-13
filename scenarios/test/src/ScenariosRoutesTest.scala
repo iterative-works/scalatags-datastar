@@ -22,6 +22,13 @@ object ScenariosRoutesTest extends TestSuite:
     private def call(request: Request[F]): (Response[F], String) =
         run(app.run(request).flatMap(resp => resp.as[String].map(resp -> _)))
 
+    /** The response without draining its body — for streaming feeds whose body emits over time. */
+    private def respond(request: Request[F]): Response[F] =
+        run(app.run(request))
+
+    private def isEventStream(response: Response[F]): Boolean =
+        response.contentType.exists(_.mediaType == MediaType.`text/event-stream`)
+
     val tests = Tests:
 
         test("GET / serves the gallery home listing every demo"):
@@ -77,6 +84,65 @@ object ScenariosRoutesTest extends TestSuite:
                 uri"/search/results".withQueryParam("datastar", "not json")
             )
             val (response, _) = call(request)
+            assert(response.status.code == 400)
+
+        test("the home page lists the Batch 0 demos too"):
+            val (_, body) = call(Request[F](Method.GET, uri"/"))
+            assert(body.contains("""href="/examples/active-search""""))
+            assert(body.contains("""href="/examples/lazy-tabs""""))
+            assert(body.contains("""href="/examples/progress-bar""""))
+
+        test("GET /active-search/search filters the catalogue and patches the contacts"):
+            val request = Request[F](
+                Method.GET,
+                uri"/active-search/search".withQueryParam("datastar", """{"search":"bern"}""")
+            )
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("Bernier"))
+            assert(body.contains("""id="contact-list""""))
+
+        test("GET /lazy-load/graph streams the loaded fragment"):
+            val (response, body) = call(Request[F](Method.GET, uri"/lazy-load/graph"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("Quarterly revenue"))
+
+        test("GET /lazy-tabs/3 returns the widget with tab 3 selected"):
+            val (response, body) = call(Request[F](Method.GET, uri"/lazy-tabs/3"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("content of tab 3"))
+            assert(body.contains("""aria-selected="true""""))
+
+        test("POST /title-update patches the document title by selector"):
+            val (response, body) = call(Request[F](Method.POST, uri"/title-update"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("data: selector title"))
+            assert(body.contains("<title>"))
+
+        test("GET /progress-bar/updates opens an event-stream feed"):
+            val response = respond(Request[F](Method.GET, uri"/progress-bar/updates"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+
+        test("GET /progressive-load/updates opens an event-stream feed"):
+            val request = Request[F](
+                Method.GET,
+                uri"/progressive-load/updates".withQueryParam("datastar", """{"loadDisabled":true}""")
+            )
+            val response = respond(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+
+        test("GET /progressive-load/updates with a datastar param that does not fit is a 400"):
+            val request = Request[F](
+                Method.GET,
+                uri"/progressive-load/updates".withQueryParam("datastar", "not json")
+            )
+            val response = respond(request)
             assert(response.status.code == 400)
 
     end tests

@@ -15,9 +15,11 @@ object Server extends ZIOAppDefault:
             _ <- ZIO.scoped:
                 for
                     _ <- HttpServer.serve(Scenarios.endpoints, port)
-                    _ <- ZIO.logInfo(s"Gallery at http://localhost:$port/")
-                    _ <- ZIO.logInfo(s"  counter:     http://localhost:$port/examples/counter")
-                    _ <- ZIO.logInfo(s"  live search: http://localhost:$port/examples/search")
+                    _ <- ZIO.logInfo(
+                        s"Gallery at http://localhost:$port/ (${Demos.all.size} examples)"
+                    )
+                    _ <- ZIO.foreachDiscard(Demos.all): demo =>
+                        ZIO.logInfo(s"  ${demo.title}: http://localhost:$port/examples/${demo.id}")
                     _ <- ZIO.never
                 yield ()
         yield ()

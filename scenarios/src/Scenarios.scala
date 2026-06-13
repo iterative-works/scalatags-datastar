@@ -16,7 +16,15 @@ import zio.*
 object Scenarios:
 
     val endpoints: List[ZServerEndpoint[Any, ZioStreams]] =
-        GalleryServer.serverEndpoints ++ CounterServer.serverEndpoints ++ SearchServer.serverEndpoints
+        GalleryServer.serverEndpoints ++
+            CounterServer.serverEndpoints ++
+            SearchServer.serverEndpoints ++
+            ActiveSearchServer.serverEndpoints ++
+            LazyLoadServer.serverEndpoints ++
+            LazyTabsServer.serverEndpoints ++
+            TitleUpdateServer.serverEndpoints ++
+            ProgressBarServer.serverEndpoints ++
+            ProgressiveLoadServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)

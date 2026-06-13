@@ -49,7 +49,103 @@ object Demos:
         )
     )
 
-    val all: Seq[Demo] = Seq(counter, search)
+    val activeSearch: Demo = Demo(
+        id = "active-search",
+        title = "Active search",
+        blurb =
+            "A debounced bound input filters a contact catalogue server-side; the same contacts " +
+                "fragment renders the initial cards and every SSE patch.",
+        widget = ActiveSearchView.demo,
+        snippets = Seq(
+            SnippetRef("The signal store", "ActiveSearch.scala", "active-search-store"),
+            SnippetRef("The template", "ActiveSearchView.scala", "active-search-view"),
+            SnippetRef("The endpoints", "ActiveSearchEndpoints.scala", "active-search-endpoints"),
+            SnippetRef("The SSE handler", "ActiveSearchServer.scala", "active-search-server")
+        )
+    )
+
+    val lazyLoad: Demo = Demo(
+        id = "lazy-load",
+        title = "Lazy load",
+        blurb = "A placeholder carries data-init, so the reverse-routed @get fires on mount; the " +
+            "server streams a fragment that replaces the placeholder by its id.",
+        widget = LazyLoadView.demo,
+        snippets = Seq(
+            SnippetRef("The template", "LazyLoadView.scala", "lazy-load-view"),
+            SnippetRef("The endpoints", "LazyLoadEndpoints.scala", "lazy-load-endpoints"),
+            SnippetRef("The SSE handler", "LazyLoadServer.scala", "lazy-load-server")
+        )
+    )
+
+    val lazyTabs: Demo = Demo(
+        id = "lazy-tabs",
+        title = "Lazy tabs",
+        blurb = "Clicking a tab fires @get('/lazy-tabs/{i}') with the index as a typed Int path " +
+            "parameter; the server returns the whole widget with that tab selected.",
+        widget = LazyTabsView.demo,
+        snippets = Seq(
+            SnippetRef("The template", "LazyTabsView.scala", "lazy-tabs-view"),
+            SnippetRef("The endpoints", "LazyTabsEndpoints.scala", "lazy-tabs-endpoints"),
+            SnippetRef("The SSE handler", "LazyTabsServer.scala", "lazy-tabs-server")
+        )
+    )
+
+    val titleUpdate: Demo = Demo(
+        id = "title-update",
+        title = "Title update",
+        blurb = "A button's action patches the document <title> over SSE — the codec targets any " +
+            "element by CSS selector, including ones in the head.",
+        widget = TitleUpdateView.demo,
+        snippets = Seq(
+            SnippetRef("The template", "TitleUpdateView.scala", "title-update-view"),
+            SnippetRef("The endpoints", "TitleUpdateEndpoints.scala", "title-update-endpoints"),
+            SnippetRef("The SSE handler", "TitleUpdateServer.scala", "title-update-server")
+        )
+    )
+
+    val progressBar: Demo = Demo(
+        id = "progress-bar",
+        title = "Progress bar",
+        blurb =
+            "A one-way feed: data-init opens an SSE stream and the server pushes a higher bar " +
+                "state every tick, using the over-time form of datastarStream.",
+        widget = ProgressBarView.demo,
+        snippets = Seq(
+            SnippetRef("The template", "ProgressBarView.scala", "progress-bar-view"),
+            SnippetRef("The endpoints", "ProgressBarEndpoints.scala", "progress-bar-endpoints"),
+            SnippetRef("The SSE handler", "ProgressBarServer.scala", "progress-bar-server")
+        )
+    )
+
+    val progressiveLoad: Demo = Demo(
+        id = "progressive-load",
+        title = "Progressive load",
+        blurb =
+            "One click opens a feed that streams four page sections back in random order, each " +
+                "patch filling its placeholder by id.",
+        widget = ProgressiveLoadView.demo,
+        snippets = Seq(
+            SnippetRef("The signal store", "ProgressiveLoad.scala", "progressive-load-store"),
+            SnippetRef("The template", "ProgressiveLoadView.scala", "progressive-load-view"),
+            SnippetRef(
+                "The endpoints",
+                "ProgressiveLoadEndpoints.scala",
+                "progressive-load-endpoints"
+            ),
+            SnippetRef("The SSE handler", "ProgressiveLoadServer.scala", "progressive-load-server")
+        )
+    )
+
+    val all: Seq[Demo] = Seq(
+        counter,
+        search,
+        activeSearch,
+        lazyLoad,
+        lazyTabs,
+        titleUpdate,
+        progressBar,
+        progressiveLoad
+    )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)
 
