@@ -260,6 +260,34 @@ object Demos:
         )
     )
 
+    val clickToEdit: Demo = Demo(
+        id = "click-to-edit",
+        title = "Click to edit",
+        blurb =
+            "A single record swaps between a display view and a bound edit form; Save @puts the " +
+                "signals and Reset @patches back to the original — both patch the server's record.",
+        widget = ClickToEditView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "ClickToEdit.scala", "click-to-edit-store"),
+            SnippetRef("The template", "ClickToEditView.scala", "click-to-edit-view"),
+            SnippetRef("The endpoints", "ClickToEditEndpoints.scala", "click-to-edit-endpoints"),
+            SnippetRef("The SSE handlers", "ClickToEditServer.scala", "click-to-edit-server")
+        )
+    )
+
+    val svgMorphing: Demo = Demo(
+        id = "svg-morphing",
+        title = "SVG morphing",
+        blurb = "A button morphs an inline SVG circle to a random colour and radius; the server " +
+            "patches the element with the svg namespace so it is created correctly.",
+        widget = SvgMorphingView.demo,
+        snippets = Seq(
+            SnippetRef("The template", "SvgMorphingView.scala", "svg-morphing-view"),
+            SnippetRef("The endpoints", "SvgMorphingEndpoints.scala", "svg-morphing-endpoints"),
+            SnippetRef("The SSE handler", "SvgMorphingServer.scala", "svg-morphing-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -276,7 +304,9 @@ object Demos:
         deleteRow,
         editRow,
         bulkUpdate,
-        todomvc
+        todomvc,
+        clickToEdit,
+        svgMorphing
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)

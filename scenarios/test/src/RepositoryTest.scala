@@ -55,6 +55,16 @@ object RepositoryTest extends TestSuite:
             run(repo.reset())
             assert(run(repo.all) == Vector(Box(1, "a"), Box(2, "b")))
 
+        test("Cell holds, sets, updates and resets a single value"):
+            val cell = Cell(Box(1, "a"))
+            assert(run(cell.get) == Box(1, "a"))
+            run(cell.set(Box(2, "b")))
+            assert(run(cell.get) == Box(2, "b"))
+            run(cell.update(_.copy(label = "x")))
+            assert(run(cell.get) == Box(2, "x"))
+            run(cell.reset())
+            assert(run(cell.get) == Box(1, "a"))
+
     end tests
 
 end RepositoryTest

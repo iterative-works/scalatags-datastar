@@ -53,7 +53,29 @@ object Repository:
     private val runtime = Runtime.default
 
     /** Allocates a `Ref` eagerly — the store must exist before the first request handles it. */
-    private def unsafeRef[A](initial: A): Ref[A] =
+    private[scenarios] def unsafeRef[A](initial: A): Ref[A] =
         Unsafe.unsafe(implicit u => runtime.unsafe.run(Ref.make(initial)).getOrThrowFiberFailure())
 
 end Repository
+
+/** A single mutable value behind a ZIO `Ref` — the single-record sibling of [[Repository]], for the
+  * examples that edit one record (a profile, a circle, a dashboard) rather than a collection. The
+  * value is created eagerly at construction; [[reset]] restores the initial one.
+  */
+final class Cell[A](initial: A):
+
+    private val ref: Ref[A] = Repository.unsafeRef(initial)
+
+    /** The current value. */
+    def get: UIO[A] = ref.get
+
+    /** Replaces the value. */
+    def set(value: A): UIO[Unit] = ref.set(value)
+
+    /** Transforms the value. */
+    def update(f: A => A): UIO[Unit] = ref.update(f)
+
+    /** Restores the initial value. */
+    def reset(): UIO[Unit] = ref.set(initial)
+
+end Cell

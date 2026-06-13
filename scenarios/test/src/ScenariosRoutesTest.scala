@@ -289,6 +289,37 @@ object ScenariosRoutesTest extends TestSuite:
             assert(run(Todos.repo.all).forall(!_.completed))
             run(Todos.repo.reset())
 
+        test("GET /click-to-edit/view renders the current record"):
+            run(Profiles.cell.reset())
+            val (response, body) = call(Request[F](Method.GET, uri"/click-to-edit/view"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("Joe Smith"))
+
+        test("PUT /click-to-edit/save persists the posted profile"):
+            run(Profiles.cell.reset())
+            val request = Request[F](Method.PUT, uri"/click-to-edit/save")
+                .withEntity("""{"firstName":"Jane","lastName":"Roe","email":"jane@example.com"}""")
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(body.contains("Jane Roe"))
+            assert(run(Profiles.cell.get).firstName == "Jane")
+            run(Profiles.cell.reset())
+
+        test("PATCH /click-to-edit/reset restores the original record"):
+            run(Profiles.cell.set(Profile("Jane", "Roe", "jane@example.com")))
+            val (response, body) = call(Request[F](Method.PATCH, uri"/click-to-edit/reset"))
+            assert(response.status.code == 200)
+            assert(body.contains("Joe Smith"))
+            assert(run(Profiles.cell.get).firstName == "Joe")
+
+        test("GET /svg-morphing/morph patches a circle in the svg namespace"):
+            val (response, body) = call(Request[F](Method.GET, uri"/svg-morphing/morph"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("data: namespace svg"))
+            assert(body.contains("<circle"))
+
     end tests
 
 end ScenariosRoutesTest
