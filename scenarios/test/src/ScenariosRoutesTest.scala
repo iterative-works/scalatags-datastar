@@ -220,6 +220,33 @@ object ScenariosRoutesTest extends TestSuite:
             assert(!rowsBody.contains("Angie MacDowell"))
             run(Members.repo.reset())
 
+        test("GET /edit-row/{id}/edit returns the inline edit form for that row"):
+            val (response, body) = call(Request[F](Method.GET, uri"/edit-row/1/edit"))
+            assert(response.status.code == 200)
+            assert(body.contains("""id="person-1""""))
+            assert(body.contains("""name="name""""))
+            assert(body.contains("@put('/edit-row/1'"))
+
+        test("PUT /edit-row/{id} saves the edited fields into the store"):
+            run(People.repo.reset())
+            val request = Request[F](Method.PUT, uri"/edit-row/2")
+                .withEntity(UrlForm("name" -> "Angela M.", "email" -> "angela@example.com"))
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(body.contains("Angela M."))
+            assert(run(People.repo.get(2L)).exists(_.name == "Angela M."))
+            run(People.repo.reset())
+
+        test("PUT /bulk-update/activate activates exactly the selected accounts"):
+            run(Accounts.repo.reset())
+            val request = Request[F](Method.PUT, uri"/bulk-update/activate")
+                .withEntity("""{"selections":[true,false,true,false,false]}""")
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(body.contains("data: mode inner"))
+            assert(run(Accounts.repo.all).filter(_.active).map(_.id).sorted == Vector(1L, 3L))
+            run(Accounts.repo.reset())
+
     end tests
 
 end ScenariosRoutesTest

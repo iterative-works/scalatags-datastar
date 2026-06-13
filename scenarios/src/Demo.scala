@@ -217,6 +217,35 @@ object Demos:
         )
     )
 
+    val editRow: Demo = Demo(
+        id = "edit-row",
+        title = "Edit row",
+        blurb =
+            "Each table row toggles between a read view and an inline edit form; Save submits the " +
+                "fields form-encoded via @put and the server patches just that row back.",
+        widget = EditRowView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "EditRow.scala", "edit-row-store"),
+            SnippetRef("The template", "EditRowView.scala", "edit-row-view"),
+            SnippetRef("The endpoints", "EditRowEndpoints.scala", "edit-row-endpoints"),
+            SnippetRef("The SSE handler", "EditRowServer.scala", "edit-row-server")
+        )
+    )
+
+    val bulkUpdate: Demo = Demo(
+        id = "bulk-update",
+        title = "Bulk update",
+        blurb = "Row checkboxes bind a selections array; a bulk @put sends the selection and the " +
+            "server flips the chosen accounts' status, then re-renders the table.",
+        widget = BulkUpdateView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "BulkUpdate.scala", "bulk-update-store"),
+            SnippetRef("The template", "BulkUpdateView.scala", "bulk-update-view"),
+            SnippetRef("The endpoints", "BulkUpdateEndpoints.scala", "bulk-update-endpoints"),
+            SnippetRef("The SSE handler", "BulkUpdateServer.scala", "bulk-update-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         search,
@@ -230,7 +259,9 @@ object Demos:
         infiniteScroll,
         inlineValidation,
         formData,
-        deleteRow
+        deleteRow,
+        editRow,
+        bulkUpdate
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)

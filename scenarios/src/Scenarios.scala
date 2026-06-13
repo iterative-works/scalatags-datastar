@@ -29,7 +29,9 @@ object Scenarios:
             InfiniteScrollServer.serverEndpoints ++
             InlineValidationServer.serverEndpoints ++
             FormDataServer.serverEndpoints ++
-            DeleteRowServer.serverEndpoints
+            DeleteRowServer.serverEndpoints ++
+            EditRowServer.serverEndpoints ++
+            BulkUpdateServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)
