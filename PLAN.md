@@ -186,9 +186,9 @@ like `scalatags-webawesome`.
   CDN asset beside the Datastar client. Validated by unit (`SourcesTest` region/dedent, `GalleryViewTest`
   chrome), integration (`ScenariosRoutesTest` proves source is read *through* a route) and end-to-end
   (`GalleryE2ETest`) tests.
-  **Fourth slice DONE — the full examples gallery:** the gallery now reimplements **26 of the 27
+  **Fourth slice DONE — the full examples gallery:** the gallery now reimplements **27 of the 28
   core data-star.dev examples** (every one but `match_media`, which needs the deferred Pro
-  `data-match-media` attribute). Built in TDD batches, each example follows the established store /
+  `data-match-media` attribute; `animations` exercises `useViewTransition` with only core attributes). Built in TDD batches, each example follows the established store /
   view / endpoints / handler shape plus a `Demos` entry and snippet regions, with view-unit and
   in-process routes-integration tests (the shared `ScenariosRoutesTest` verifies store state after
   each mutation, with `reset()` bookends). New library pieces this required: the over-time

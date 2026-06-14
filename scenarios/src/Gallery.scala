@@ -92,6 +92,22 @@ object Gallery:
           |.demo .ascii { font-family: "JetBrains Mono", Menlo, Consolas, monospace; white-space: pre;
           |  line-height: 1.05; font-size: 0.7rem; background: #0f172a; color: #e2e8f0; padding: 0.75rem; border-radius: 0.375rem; }
           |.demo .flashable { font-weight: 600; }
+          |.demo .technique { margin-bottom: 1.5rem; }
+          |.demo .technique:last-child { margin-bottom: 0; }
+          |.demo .technique h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+          |.demo .technique > p { color: #475569; font-size: 0.9rem; margin: 0 0 0.5rem; }
+          |.demo .throb { display: inline-block; padding: 0.75rem 1.25rem; border-radius: 0.375rem;
+          |  color: #fff; font-weight: 600; transition: background-color 0.7s ease; }
+          |.demo .vt-panel { max-width: 16rem; }
+          |.demo .vt-panel li { padding: 0.4rem 0.6rem; background: #fff; border: 1px solid #e2e8f0;
+          |  border-radius: 0.375rem; margin-bottom: 0.4rem; }
+          |.demo .fade-card { transition: opacity 0.6s ease; padding: 0.75rem 1rem; background: #fff;
+          |  border: 1px solid #e2e8f0; border-radius: 0.375rem; max-width: 18rem; }
+          |.demo .fade-card.fading { opacity: 0; }
+          |.demo .fade-in-list { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem; }
+          |.demo .fade-in-item { padding: 0.4rem 0.6rem; background: #eef2ff; color: #3730a3;
+          |  border-radius: 0.375rem; animation: demo-fade-in 1s ease; }
+          |@keyframes demo-fade-in { from { opacity: 0; } to { opacity: 1; } }
           |""".stripMargin
 
     private val headExtra: Frag = frag(

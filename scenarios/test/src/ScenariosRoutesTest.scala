@@ -368,6 +368,45 @@ object ScenariosRoutesTest extends TestSuite:
             )
             assert(respond(request).status.code == 400)
 
+        test("GET /animations/color-throb opens an event-stream feed"):
+            val response = respond(Request[F](Method.GET, uri"/animations/color-throb"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+
+        test("GET /animations/view-transition swaps with a view transition and flips the flag"):
+            val request = Request[F](
+                Method.GET,
+                uri"/animations/view-transition".withQueryParam("datastar", """{"swapped":false}""")
+            )
+            val (response, body) = call(request)
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("useViewTransition true"))
+            assert(body.contains("""data: signals {"swapped":true}"""))
+
+        test("GET /animations/view-transition with a datastar param that does not fit is a 400"):
+            val request = Request[F](
+                Method.GET,
+                uri"/animations/view-transition".withQueryParam("datastar", "not json")
+            )
+            assert(respond(request).status.code == 400)
+
+        test("DELETE /animations/fade-out fades the card then removes it"):
+            val (response, body) = call(Request[F](Method.DELETE, uri"/animations/fade-out"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("fading"))
+            assert(body.contains("data: mode remove"))
+            assert(body.contains("selector #fade-out-card"))
+
+        test("GET /animations/fade-in appends a faded-in item"):
+            val (response, body) = call(Request[F](Method.GET, uri"/animations/fade-in"))
+            assert(response.status.code == 200)
+            assert(isEventStream(response))
+            assert(body.contains("data: mode append"))
+            assert(body.contains("selector #fade-in-list"))
+            assert(body.contains("fade-in-item"))
+
     end tests
 
 end ScenariosRoutesTest

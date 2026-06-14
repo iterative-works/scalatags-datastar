@@ -37,7 +37,8 @@ object Scenarios:
             TemplCounterServer.serverEndpoints ++
             FileUploadServer.serverEndpoints ++
             BadAppleServer.serverEndpoints ++
-            DbmonServer.serverEndpoints
+            DbmonServer.serverEndpoints ++
+            AnimationsServer.serverEndpoints
 
     val routes: HttpRoutes[[A] =>> RIO[Any, A]] =
         HttpServer.routes(endpoints)

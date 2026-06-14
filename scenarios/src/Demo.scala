@@ -390,6 +390,21 @@ object Demos:
         )
     )
 
+    val animations: Demo = Demo(
+        id = "animations",
+        title = "Animations",
+        blurb =
+            "Four techniques driven by only HTML, CSS and SSE: a colour throb over a stable id, " +
+                "a view-transition swap, fade-out-then-remove, and fade-in-on-append.",
+        widget = AnimationsView.demo,
+        snippets = Seq(
+            SnippetRef("The store", "Animations.scala", "animations-store"),
+            SnippetRef("The template", "AnimationsView.scala", "animations-view"),
+            SnippetRef("The endpoints", "AnimationsEndpoints.scala", "animations-endpoints"),
+            SnippetRef("The SSE handlers", "AnimationsServer.scala", "animations-server")
+        )
+    )
+
     val all: Seq[Demo] = Seq(
         counter,
         activeSearch,
@@ -417,7 +432,8 @@ object Demos:
         sortable,
         fileUpload,
         badApple,
-        dbmon
+        dbmon,
+        animations
     )
 
     def byId(id: String): Option[Demo] = all.find(_.id == id)
