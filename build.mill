@@ -1,11 +1,20 @@
-//| mvnDeps: ["com.goyeau::mill-scalafix::0.6.0"]
+//| mvnDeps:
+//|   - com.goyeau::mill-scalafix::0.6.0
+//|   - com.lihaoyi::mill-contrib-scoverage:$MILL_VERSION
 // PURPOSE: Mill build definition for the scalatags-datastar library.
 // PURPOSE: Provides Scalatags bindings for the Datastar hypermedia framework.
 package build
 
 import mill._, scalalib._, scalajslib._, publish._
 import mill.scalalib.scalafmt.ScalafmtModule
+import mill.contrib.scoverage.{ScoverageModule, ScoverageReport}
 import com.goyeau.mill.scalafix.ScalafixModule
+
+// Single source of truth for the scoverage instrumentation version. Every ScoverageModule and the
+// aggregating ScoverageReport must agree on it, or the aggregate report task fails on a mismatch.
+// Only the JVM modules are instrumented — Scala 3 coverage is the compiler's native `-coverage-out`,
+// which the Scala.js backend does not emit, so the JS modules stay uninstrumented.
+val ScoverageVersion = "2.1.0"
 
 val scalaV = "3.3.8"
 val scalaJSV = "1.21.0"
@@ -77,8 +86,9 @@ object datastar extends Module {
     )
   }
 
-  object jvm extends Shared {
-    object test extends ScalaTests with TestModule.Utest with ScalafixModule {
+  object jvm extends Shared with ScoverageModule {
+    def scoverageVersion = ScoverageVersion
+    object test extends ScoverageTests with TestModule.Utest with ScalafixModule {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
     }
   }
@@ -115,10 +125,11 @@ object tapir extends Module {
     )
   }
 
-  object jvm extends Shared {
+  object jvm extends Shared with ScoverageModule {
+    def scoverageVersion = ScoverageVersion
     def moduleDeps = Seq(datastar.jvm)
 
-    object test extends ScalaTests with TestModule.Utest with ScalafixModule {
+    object test extends ScoverageTests with TestModule.Utest with ScalafixModule {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
     }
   }
@@ -136,8 +147,9 @@ object tapir extends Module {
 
 // Native server-side SSE codec: patch-elements / patch-signals / readSignals. JVM-only (server
 // concern). Stack-neutral — it produces the SSE wire strings; the HTTP transport lives downstream.
-object sse extends IWScalacOptions {
+object sse extends IWScalacOptions with ScoverageModule {
   def scalaVersion = scalaV
+  def scoverageVersion = ScoverageVersion
 
   def mvnDeps = Seq(
     mvn"com.lihaoyi::scalatags::$scalatagsV",
@@ -146,7 +158,7 @@ object sse extends IWScalacOptions {
 
   // Test-only dependency on the core bindings, to prove the signal store round-trips: the same
   // case class that derives `Signals` for the initial value decodes back via `readSignals`.
-  object test extends ScalaTests with TestModule.Utest with ScalafixModule {
+  object test extends ScoverageTests with TestModule.Utest with ScalafixModule {
     def moduleDeps = super.moduleDeps ++ Seq(datastar.jvm)
     def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
   }
@@ -156,8 +168,9 @@ object sse extends IWScalacOptions {
 // 400, decoded in the codec) and the `text/event-stream` output plus response stream a handler
 // answers an action with. Joins the two surfaces it depends on — the tapir bridge and the SSE
 // codec — onto a Tapir/ZIO server, so it is JVM-only.
-object tapirsse extends IWScalacOptions {
+object tapirsse extends IWScalacOptions with ScoverageModule {
   def scalaVersion = scalaV
+  def scoverageVersion = ScoverageVersion
 
   def moduleDeps = Seq(tapir.jvm, sse)
 
@@ -167,15 +180,16 @@ object tapirsse extends IWScalacOptions {
     mvn"dev.zio::zio-json::$zioJsonV"
   )
 
-  object test extends ScalaTests with TestModule.Utest with ScalafixModule {
+  object test extends ScoverageTests with TestModule.Utest with ScalafixModule {
     def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
   }
 }
 
 // Phase 5 dogfood app: canonical Datastar examples on the house stack (tapir + http4s + ZIO),
 // proving the typed bindings, the endpoint bridge and the SSE codec compose end to end. JVM-only.
-object scenarios extends IWScalacOptions {
+object scenarios extends IWScalacOptions with ScoverageModule {
   def scalaVersion = scalaV
+  def scoverageVersion = ScoverageVersion
 
   def moduleDeps = Seq(datastar.jvm, tapir.jvm, sse, tapirsse)
 
@@ -199,10 +213,17 @@ object scenarios extends IWScalacOptions {
   def mainClass = Some("works.iterative.scalatags.datastar.scenarios.Server")
 
   // Real end-to-end HTTP test: boots the server and drives it with a real sttp client request.
-  object test extends ScalaTests with TestModule.Utest with ScalafixModule {
+  object test extends ScoverageTests with TestModule.Utest with ScalafixModule {
     def mvnDeps = Seq(
       mvn"com.lihaoyi::utest::$utestV",
       mvn"com.softwaremill.sttp.client3::core::$sttpClientV"
     )
   }
+}
+
+// Aggregates the per-module scoverage data into one report (./mill scoverage.htmlReportAll /
+// xmlReportAll). Its scalaVersion and scoverageVersion must match the instrumented modules.
+object scoverage extends ScoverageReport {
+  override def scalaVersion = scalaV
+  override def scoverageVersion = ScoverageVersion
 }
