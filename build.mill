@@ -52,27 +52,35 @@ trait IWScalacOptions extends ScalaModule with ScalafmtModule with ScalafixModul
   }
 }
 
-object datastar extends Module {
+// One library version, shared by every published module. Bump it (drop -SNAPSHOT) and tag `vX.Y.Z`
+// to cut a release; a push to main publishes the current -SNAPSHOT. See DEVELOPMENT.md → Publishing.
+val publishVer = "0.1.0-SNAPSHOT"
 
-  val publishOrg = "works.iterative"
-  val publishVer = "0.1.0-SNAPSHOT"
-
-  val publishPom = PomSettings(
-    description = "Scalatags bindings for the Datastar hypermedia framework",
-    organization = publishOrg,
+// POM metadata shared by every published module; only the description varies per module.
+object CommonPom {
+  def apply(description: String) = PomSettings(
+    description = description,
+    organization = "works.iterative",
     url = "https://github.com/iterative-works/scalatags-datastar",
     licenses = Seq(License.MIT),
-    versionControl =
-      VersionControl.github("iterative-works", "scalatags-datastar"),
+    versionControl = VersionControl.github("iterative-works", "scalatags-datastar"),
     developers = Seq(
       Developer("mph", "Michal Příhoda", "https://github.com/mprihoda")
     )
   )
+}
 
-  trait Shared extends IWScalacOptions with PublishModule {
+// Wires a module for publishing at the shared library version; each module supplies its own
+// pomSettings (via CommonPom) and artifactName. The dogfood `scenarios` app is not published.
+trait Published extends PublishModule {
+  def publishVersion = publishVer
+}
+
+object datastar extends Module {
+
+  trait Shared extends IWScalacOptions with Published {
     def scalaVersion = scalaV
-    def publishVersion = publishVer
-    def pomSettings = publishPom
+    def pomSettings = CommonPom("Scalatags bindings for the Datastar hypermedia framework")
     def artifactName = "scalatags-datastar"
 
     def sharedSources = Task.Sources(moduleDir / os.up / "src")
@@ -111,8 +119,10 @@ object datastar extends Module {
 // emits Datastar syntax and renders core's `ActionOptions` — so a bridge depends on what it bridges.
 object tapir extends Module {
 
-  trait Shared extends IWScalacOptions {
+  trait Shared extends IWScalacOptions with Published {
     def scalaVersion = scalaV
+    def pomSettings = CommonPom("Tapir endpoint bridge for scalatags-datastar")
+    def artifactName = "scalatags-datastar-tapir"
 
     def sharedSources = Task.Sources(moduleDir / os.up / "src")
 
@@ -147,9 +157,11 @@ object tapir extends Module {
 
 // Native server-side SSE codec: patch-elements / patch-signals / readSignals. JVM-only (server
 // concern). Stack-neutral — it produces the SSE wire strings; the HTTP transport lives downstream.
-object sse extends IWScalacOptions with ScoverageModule {
+object sse extends IWScalacOptions with ScoverageModule with Published {
   def scalaVersion = scalaV
   def scoverageVersion = ScoverageVersion
+  def pomSettings = CommonPom("Server-side SSE codec for scalatags-datastar")
+  def artifactName = "scalatags-datastar-sse"
 
   def mvnDeps = Seq(
     mvn"com.lihaoyi::scalatags::$scalatagsV",
@@ -168,9 +180,11 @@ object sse extends IWScalacOptions with ScoverageModule {
 // 400, decoded in the codec) and the `text/event-stream` output plus response stream a handler
 // answers an action with. Joins the two surfaces it depends on — the tapir bridge and the SSE
 // codec — onto a Tapir/ZIO server, so it is JVM-only.
-object tapirsse extends IWScalacOptions with ScoverageModule {
+object tapirsse extends IWScalacOptions with ScoverageModule with Published {
   def scalaVersion = scalaV
   def scoverageVersion = ScoverageVersion
+  def pomSettings = CommonPom("Tapir + SSE server bridge for scalatags-datastar")
+  def artifactName = "scalatags-datastar-tapirsse"
 
   def moduleDeps = Seq(tapir.jvm, sse)
 
