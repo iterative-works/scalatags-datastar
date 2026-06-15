@@ -19,6 +19,30 @@ val zioInteropCatsV = "23.1.0.13"
 val http4sBlazeV = "0.23.17"
 val sttpClientV = "3.11.0"
 
+// Project-wide Scala 3 compiler options. `-Werror` makes every warning a compile error, so the
+// strict warning set is load-bearing — a clean build is enforced, not merely encouraged. Mixes in
+// ScalafmtModule and ScalafixModule so every module is reachable by `./mill __.reformat` and
+// `./mill __.fix` (and their `--check` forms in CI). SemanticDB is sourced via Mill's internal
+// task used by mill-scalafix; the raw `-Xsemanticdb` flag is deliberately omitted because on
+// Scala 3 it writes `.semanticdb` files next to sources and pollutes the working tree.
+trait IWScalacOptions extends ScalaModule with ScalafmtModule with ScalafixModule {
+  override def scalacOptions = Task {
+    super.scalacOptions() ++ Seq(
+      "-encoding",
+      "utf8",
+      "-deprecation",
+      "-feature",
+      "-unchecked",
+      "-language:higherKinds",
+      "-language:implicitConversions",
+      "-Wvalue-discard",
+      "-Wnonunit-statement",
+      "-Wunused:all",
+      "-Werror"
+    )
+  }
+}
+
 object datastar extends Module {
 
   val publishOrg = "works.iterative"
@@ -36,7 +60,7 @@ object datastar extends Module {
     )
   )
 
-  trait Shared extends ScalaModule with PublishModule with ScalafmtModule with ScalafixModule {
+  trait Shared extends IWScalacOptions with PublishModule {
     def scalaVersion = scalaV
     def publishVersion = publishVer
     def pomSettings = publishPom
@@ -54,7 +78,7 @@ object datastar extends Module {
   }
 
   object jvm extends Shared {
-    object test extends ScalaTests with TestModule.Utest {
+    object test extends ScalaTests with TestModule.Utest with ScalafixModule {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
     }
   }
@@ -66,7 +90,7 @@ object datastar extends Module {
       mvn"org.scala-js::scalajs-dom::$scalaJsDomV"
     )
 
-    object test extends ScalaJSTests with TestModule.Utest {
+    object test extends ScalaJSTests with TestModule.Utest with ScalafixModule {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
     }
   }
@@ -77,7 +101,7 @@ object datastar extends Module {
 // emits Datastar syntax and renders core's `ActionOptions` — so a bridge depends on what it bridges.
 object tapir extends Module {
 
-  trait Shared extends ScalaModule with ScalafmtModule with ScalafixModule {
+  trait Shared extends IWScalacOptions {
     def scalaVersion = scalaV
 
     def sharedSources = Task.Sources(moduleDir / os.up / "src")
@@ -94,7 +118,7 @@ object tapir extends Module {
   object jvm extends Shared {
     def moduleDeps = Seq(datastar.jvm)
 
-    object test extends ScalaTests with TestModule.Utest {
+    object test extends ScalaTests with TestModule.Utest with ScalafixModule {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
     }
   }
@@ -104,7 +128,7 @@ object tapir extends Module {
 
     def moduleDeps = Seq(datastar.js)
 
-    object test extends ScalaJSTests with TestModule.Utest {
+    object test extends ScalaJSTests with TestModule.Utest with ScalafixModule {
       def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
     }
   }
@@ -112,7 +136,7 @@ object tapir extends Module {
 
 // Native server-side SSE codec: patch-elements / patch-signals / readSignals. JVM-only (server
 // concern). Stack-neutral — it produces the SSE wire strings; the HTTP transport lives downstream.
-object sse extends ScalaModule with ScalafmtModule with ScalafixModule {
+object sse extends IWScalacOptions {
   def scalaVersion = scalaV
 
   def mvnDeps = Seq(
@@ -122,7 +146,7 @@ object sse extends ScalaModule with ScalafmtModule with ScalafixModule {
 
   // Test-only dependency on the core bindings, to prove the signal store round-trips: the same
   // case class that derives `Signals` for the initial value decodes back via `readSignals`.
-  object test extends ScalaTests with TestModule.Utest {
+  object test extends ScalaTests with TestModule.Utest with ScalafixModule {
     def moduleDeps = super.moduleDeps ++ Seq(datastar.jvm)
     def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
   }
@@ -132,7 +156,7 @@ object sse extends ScalaModule with ScalafmtModule with ScalafixModule {
 // 400, decoded in the codec) and the `text/event-stream` output plus response stream a handler
 // answers an action with. Joins the two surfaces it depends on — the tapir bridge and the SSE
 // codec — onto a Tapir/ZIO server, so it is JVM-only.
-object tapirsse extends ScalaModule with ScalafmtModule with ScalafixModule {
+object tapirsse extends IWScalacOptions {
   def scalaVersion = scalaV
 
   def moduleDeps = Seq(tapir.jvm, sse)
@@ -143,14 +167,14 @@ object tapirsse extends ScalaModule with ScalafmtModule with ScalafixModule {
     mvn"dev.zio::zio-json::$zioJsonV"
   )
 
-  object test extends ScalaTests with TestModule.Utest {
+  object test extends ScalaTests with TestModule.Utest with ScalafixModule {
     def mvnDeps = Seq(mvn"com.lihaoyi::utest::$utestV")
   }
 }
 
 // Phase 5 dogfood app: canonical Datastar examples on the house stack (tapir + http4s + ZIO),
 // proving the typed bindings, the endpoint bridge and the SSE codec compose end to end. JVM-only.
-object scenarios extends ScalaModule with ScalafmtModule with ScalafixModule {
+object scenarios extends IWScalacOptions {
   def scalaVersion = scalaV
 
   def moduleDeps = Seq(datastar.jvm, tapir.jvm, sse, tapirsse)
@@ -175,7 +199,7 @@ object scenarios extends ScalaModule with ScalafmtModule with ScalafixModule {
   def mainClass = Some("works.iterative.scalatags.datastar.scenarios.Server")
 
   // Real end-to-end HTTP test: boots the server and drives it with a real sttp client request.
-  object test extends ScalaTests with TestModule.Utest {
+  object test extends ScalaTests with TestModule.Utest with ScalafixModule {
     def mvnDeps = Seq(
       mvn"com.lihaoyi::utest::$utestV",
       mvn"com.softwaremill.sttp.client3::core::$sttpClientV"

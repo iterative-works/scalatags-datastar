@@ -2,11 +2,11 @@
 // PURPOSE: Guards against one endpoint shadowing another, and proves source is read through a route.
 package works.iterative.scalatags.datastar.scenarios
 
+import org.http4s.*
+import org.http4s.implicits.*
 import utest.*
 import zio.*
 import zio.interop.catz.*
-import org.http4s.*
-import org.http4s.implicits.*
 
 object ScenariosRoutesTest extends TestSuite:
 
@@ -76,7 +76,9 @@ object ScenariosRoutesTest extends TestSuite:
             val (response, _) = call(request)
             assert(response.status.code == 400)
 
-        test("GET /active-search/search with a datastar param that does not fit the store is a 400"):
+        test(
+            "GET /active-search/search with a datastar param that does not fit the store is a 400"
+        ):
             val request = Request[F](
                 Method.GET,
                 uri"/active-search/search".withQueryParam("datastar", "not json")
@@ -129,7 +131,10 @@ object ScenariosRoutesTest extends TestSuite:
         test("GET /progressive-load/updates opens an event-stream feed"):
             val request = Request[F](
                 Method.GET,
-                uri"/progressive-load/updates".withQueryParam("datastar", """{"loadDisabled":true}""")
+                uri"/progressive-load/updates".withQueryParam(
+                    "datastar",
+                    """{"loadDisabled":true}"""
+                )
             )
             val response = respond(request)
             assert(response.status.code == 200)
@@ -192,7 +197,11 @@ object ScenariosRoutesTest extends TestSuite:
 
         test("POST /form-data/submit reads the form-encoded fields and echoes them"):
             val request = Request[F](Method.POST, uri"/form-data/submit")
-                .withEntity(UrlForm("name" -> "Pizza", "toppings" -> "cheese", "toppings" -> "onion"))
+                .withEntity(UrlForm(
+                    "name" -> "Pizza",
+                    "toppings" -> "cheese",
+                    "toppings" -> "onion"
+                ))
             val (response, body) = call(request)
             assert(response.status.code == 200)
             assert(isEventStream(response))
@@ -323,7 +332,7 @@ object ScenariosRoutesTest extends TestSuite:
             val (first, firstBody) = call(Request[F](Method.POST, uri"/templ-counter/increment"))
             assert(first.status.code == 200)
             assert(firstBody.contains(">1<"))
-            call(Request[F](Method.POST, uri"/templ-counter/increment"))
+            val _ = call(Request[F](Method.POST, uri"/templ-counter/increment"))
             assert(run(GlobalCounter.cell.get) == 2)
             val (_, countBody) = call(Request[F](Method.GET, uri"/templ-counter/count"))
             assert(countBody.contains(">2<"))

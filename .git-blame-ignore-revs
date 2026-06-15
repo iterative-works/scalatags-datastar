@@ -1,0 +1,11 @@
+# Commits listed here are skipped by `git blame` so the previous author of
+# each line is shown instead. Reserved for mechanical rewrites (mass reformat,
+# import sweeps) — never for semantic refactors.
+#
+# To enable locally:   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# GitHub's web blame respects this file automatically (no configuration).
+
+# style: scalafmt + scalafix OrganizeImports sweep
+# Mechanical scalafix OrganizeImports + scalafmt normalization across 93
+# sources, alongside enabling the strict-warnings and lint gates.
+f456df6e7f3aa2c197d3b3a6409af109afad00e1

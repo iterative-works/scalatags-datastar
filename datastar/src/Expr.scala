@@ -2,6 +2,8 @@
 // PURPOSE: Operators build a tree rendered with JS precedence, so output needs no manual parentheses.
 package works.iterative.scalatags.datastar
 
+import scala.annotation.unused
+
 /** A typed Datastar expression.
   *
   * Datastar drives reactivity from expressions written as JavaScript strings, e.g.
@@ -77,7 +79,9 @@ object Expr:
         def ===(that: Expr[A]): Expr[Boolean] = new Binary("===", 8, self, that)
         def !==(that: Expr[A]): Expr[Boolean] = new Binary("!==", 8, self, that)
 
-    extension [A](self: Expr[A])(using Numeric[A])
+    // `Numeric[A]` is a pure constraint — it gates these operators to numeric expressions but is
+    // never referenced in the bodies, so it is marked `@unused` to satisfy `-Wunused`.
+    extension [A](self: Expr[A])(using @unused num: Numeric[A])
         def >(that: Expr[A]): Expr[Boolean] = new Binary(">", 9, self, that)
         def <(that: Expr[A]): Expr[Boolean] = new Binary("<", 9, self, that)
         def >=(that: Expr[A]): Expr[Boolean] = new Binary(">=", 9, self, that)
