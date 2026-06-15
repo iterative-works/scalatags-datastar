@@ -1,0 +1,210 @@
+# PURPOSE: CI gate — formats, lints, cross-compiles and tests every module on push/PR.
+# PURPOSE: Mirrors the local gates (scalafmt, scalafix, -Werror) plus a no-silent-skip audit and coverage.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Manual run button on the Actions tab (and `gh workflow run CI`). Available
+  # once this trigger is on the default branch.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel an in-progress run when a newer commit lands on the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # The Scala.js test modules (datastar.js.test, tapir.js.test) link to JS and
+      # run on Node, so a Node runtime must be present even though the library ships
+      # no frontend. Pinned to the current LTS line.
+      - name: Set up Node.js 22
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: '22'
+
+      # Cache keys hash both build.mill and .mill-version. Including .mill-version
+      # is load-bearing: a Mill upgrade must invalidate the out/ cache cleanly,
+      # otherwise stale incremental-compile state from the previous Mill version
+      # poisons subsequent runs.
+      - name: Cache Coursier
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          path: ~/.cache/coursier
+          key: coursier-${{ runner.os }}-${{ hashFiles('build.mill', '.mill-version') }}
+          restore-keys: |
+            coursier-${{ runner.os }}-
+
+      - name: Cache Mill out/
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          path: out
+          key: mill-out-${{ runner.os }}-${{ hashFiles('build.mill', '.mill-version') }}
+          restore-keys: |
+            mill-out-${{ runner.os }}-
+
+      # Fast-fail formatting gate: cheaper than tests, so it sits ahead of them.
+      # Reformat locally with `./mill mill.scalalib.scalafmt.ScalafmtModule/reformatAll __.sources`.
+      - name: scalafmt check
+        run: ./mill mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources
+
+      # Scalafix lint gate (DisableSyntax + OrganizeImports + RemoveUnused). Builds
+      # SemanticDB, so a compile error also fails here. Fix locally with `./mill __.fix`.
+      - name: scalafix check
+        run: ./mill __.fix --check
+
+      # Per-module test steps, run as separate invocations on purpose: each module's
+      # timing is visible, the silent-skip audit can tell a module apart, and running
+      # the JS and JVM test modules in one Mill invocation can race in test discovery.
+      - name: datastar.jvm.test
+        run: ./mill datastar.jvm.test
+      - name: datastar.js.test
+        run: ./mill datastar.js.test
+      - name: tapir.jvm.test
+        run: ./mill tapir.jvm.test
+      - name: tapir.js.test
+        run: ./mill tapir.js.test
+      - name: sse.test
+        run: ./mill sse.test
+      - name: tapirsse.test
+        run: ./mill tapirsse.test
+      - name: scenarios.test
+        run: ./mill scenarios.test
+
+      # Upload even on failure: the report is most valuable when a test goes red and
+      # reviewers need per-class timings to triage. Only the JVM modules emit JUnit
+      # XML; the Scala.js runner does not, so the JS modules are guarded by their own
+      # steps above rather than by the artifact or the audit below.
+      - name: Upload JUnit XML reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: junit-xml
+          path: out/**/test/testForked.dest/test-report.xml
+          if-no-files-found: error
+          retention-days: 14
+
+      # Runs after the upload so the report is preserved even when the audit fails the
+      # build. Module paths are hard-coded on purpose: a glob would defeat the
+      # "module didn't run" detection. JVM modules only — see the upload note above.
+      - name: Silent-skip audit (no test may be skipped)
+        if: always()
+        run: |
+          set -euo pipefail
+          modules=(
+            "out/datastar/jvm/test/testForked.dest/test-report.xml"
+            "out/tapir/jvm/test/testForked.dest/test-report.xml"
+            "out/sse/test/testForked.dest/test-report.xml"
+            "out/tapirsse/test/testForked.dest/test-report.xml"
+            "out/scenarios/test/testForked.dest/test-report.xml"
+          )
+          fail=0
+          for report in "${modules[@]}"; do
+            if [[ ! -f "$report" ]]; then
+              echo "::error::Missing JUnit report: $report (module did not run)"
+              fail=1
+              continue
+            fi
+            # Both <skipped> child elements and skipped="N" (N>0) attributes count.
+            if grep -E -q '<skipped(/>| )|skipped="[1-9]' "$report"; then
+              echo "::error::Skipped tests detected in $report"
+              grep -nE '<skipped|skipped="[1-9]' "$report" || true
+              fail=1
+            fi
+          done
+          exit "$fail"
+
+      # No `if:` means the implicit default `if: success()` — coverage is generated
+      # only when every prior step (tests + audit) passed, because coverage data is
+      # only meaningful for a green run. Generates per-module XML plus the aggregated
+      # HTML. Only the JVM modules are instrumented (Scala 3 coverage is the compiler's
+      # native -coverage-out, which the Scala.js backend does not emit).
+      - name: Run coverage
+        run: ./mill __.scoverage.xmlReport && ./mill scoverage.htmlReportAll
+
+      # Parses the per-module Scoverage XML and writes a Markdown summary table to the
+      # job summary page. if: always() so the table renders even if a later step fails
+      # after a green test+coverage run. The extract_coverage function isolates the XML
+      # shape so a Scoverage swap costs one function.
+      - name: Coverage summary
+        if: always()
+        run: |
+          set -euo pipefail
+
+          # extract_coverage <xml-file>
+          # Prints: <statements-invoked> <statement-count> <statement-rate>
+          # from the top-level <scoverage> element, with a numeric fallback so a
+          # missing or malformed attribute keeps the summary table numeric.
+          extract_coverage() {
+            local xml="$1"
+            if [[ ! -f "$xml" ]]; then
+              echo "0 0 0.00"
+              return
+            fi
+            local invoked total rate
+            invoked=$(grep -m1 'statements-invoked=' "$xml" \
+              | grep -oP 'statements-invoked="\K[0-9]+' || echo "0")
+            total=$(grep -m1 'statement-count=' "$xml" \
+              | grep -oP 'statement-count="\K[0-9]+' || echo "0")
+            rate=$(grep -m1 'statement-rate=' "$xml" \
+              | grep -oP 'statement-rate="\K[0-9.]+' || echo "0.00")
+            echo "${invoked} ${total} ${rate}"
+          }
+
+          {
+            echo "## Coverage summary"
+            echo ""
+            echo "| Module | Statements covered | Statements total | Coverage % |"
+            echo "|--------|-------------------|-----------------|------------|"
+
+            modules=(
+              "datastar.jvm:out/datastar/jvm/scoverage/xmlReport.dest/scoverage.xml"
+              "tapir.jvm:out/tapir/jvm/scoverage/xmlReport.dest/scoverage.xml"
+              "sse:out/sse/scoverage/xmlReport.dest/scoverage.xml"
+              "tapirsse:out/tapirsse/scoverage/xmlReport.dest/scoverage.xml"
+              "scenarios:out/scenarios/scoverage/xmlReport.dest/scoverage.xml"
+            )
+
+            for entry in "${modules[@]}"; do
+              module="${entry%%:*}"
+              xml="${entry##*:}"
+              read -r invoked total rate <<< "$(extract_coverage "$xml")"
+              echo "| \`${module}\` | ${invoked} | ${total} | ${rate}% |"
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Upload the coverage reports as an artifact (retained 14 days). if: always()
+      # so it uploads even if the summary step fails. if-no-files-found: warn — the
+      # "Run coverage" step has no if: always() (coverage on a red build is
+      # misleading), so on a test failure there are no XML files and an `error` guard
+      # would double-red the run; `warn` still flags missing files on a green run.
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: coverage-report
+          path: |
+            out/datastar/jvm/scoverage/xmlReport.dest/scoverage.xml
+            out/tapir/jvm/scoverage/xmlReport.dest/scoverage.xml
+            out/sse/scoverage/xmlReport.dest/scoverage.xml
+            out/tapirsse/scoverage/xmlReport.dest/scoverage.xml
+            out/scenarios/scoverage/xmlReport.dest/scoverage.xml
+            out/scoverage/htmlReportAll.dest/**
+          if-no-files-found: warn
+          retention-days: 14
