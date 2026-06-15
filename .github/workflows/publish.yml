@@ -1,0 +1,44 @@
+# PURPOSE: Publish the library modules to Sonatype Central on main pushes and v* tags.
+# PURPOSE: Artifacts are PGP-signed; credentials come from repo secrets (works.iterative namespace).
+
+name: Publish
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache Coursier
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
+        with:
+          path: ~/.cache/coursier
+          key: coursier-${{ runner.os }}-${{ hashFiles('build.mill', '.mill-version') }}
+          restore-keys: |
+            coursier-${{ runner.os }}-
+
+      # publishAll signs every module's artifacts (jar, sources, javadoc, pom) with the PGP key in
+      # MILL_PGP_SECRET_BASE64 and uploads them to Sonatype Central. A push to main publishes the
+      # current -SNAPSHOT; a vX.Y.Z tag (with publishVer bumped to the matching release) publishes
+      # the release. __.publishArtifacts is every PublishModule — the four library modules across
+      # their platforms, not the scenarios dogfood app.
+      - name: Publish to Sonatype Central
+        env:
+          MILL_PGP_SECRET_BASE64: ${{ secrets.MILL_PGP_SECRET_BASE64 }}
+          MILL_SONATYPE_USERNAME: ${{ secrets.MILL_SONATYPE_USERNAME }}
+          MILL_SONATYPE_PASSWORD: ${{ secrets.MILL_SONATYPE_PASSWORD }}
+        run: ./mill mill.javalib.SonatypeCentralPublishModule/publishAll --publishArtifacts __.publishArtifacts

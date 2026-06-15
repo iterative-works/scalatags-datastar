@@ -109,6 +109,50 @@ running the tests:
 CI runs these on a green build, writes a per-module coverage table to the job summary,
 and uploads the XML + HTML as the `coverage-report` artifact.
 
+## Publishing
+
+The four library modules publish to [Sonatype Central](https://central.sonatype.com)
+under the `works.iterative` namespace; the `scenarios` dogfood app is not published.
+The cross-built modules publish both a JVM (`_3`) and a Scala.js (`_sjs1_3`) artifact.
+
+| Module | Artifact |
+|---|---|
+| `datastar` | `works.iterative::scalatags-datastar` |
+| `tapir` | `works.iterative::scalatags-datastar-tapir` |
+| `sse` | `works.iterative::scalatags-datastar-sse` |
+| `tapirsse` | `works.iterative::scalatags-datastar-tapirsse` |
+
+All modules share one version — `publishVer` in `build.mill`.
+
+### Release process
+
+- **Snapshot:** every push to `main` publishes the current `publishVer` (kept at
+  `X.Y.Z-SNAPSHOT` during development) via the
+  [Publish workflow](.github/workflows/publish.yml).
+- **Release:** bump `publishVer` to drop `-SNAPSHOT`, commit, then tag and push:
+
+  ```bash
+  git tag v0.1.0 && git push origin v0.1.0
+  ```
+
+  The tag push runs the same workflow and publishes the release. Afterwards bump
+  `publishVer` to the next `-SNAPSHOT`.
+
+### Credentials
+
+The workflow needs three repo secrets (set with `gh secret set <name> -R <repo>`):
+
+| Secret | Value |
+|---|---|
+| `MILL_PGP_SECRET_BASE64` | base64-encoded GPG private signing key |
+| `MILL_SONATYPE_USERNAME` | user token from <https://central.sonatype.com/usertoken> |
+| `MILL_SONATYPE_PASSWORD` | the token's password (same page) |
+
+To publish from a workstation, export the same variables (plus `MILL_PGP_PASSPHRASE`
+if the key has one) from a gitignored `.envrc.local` and run the workflow's command
+directly. `./mill __.publishLocal` publishes to `~/.ivy2/local` for testing without
+credentials.
+
 ## Git hooks
 
 Tracked under `.githooks/`. Wire them once per clone:
