@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# PURPOSE: Block commits that would fail CI's scalafmt gate.
+# PURPOSE: Runs ./mill scalafmt check; matches the scalafmt step in .github/workflows/ci.yml.
+
+set -euo pipefail
+
+# Only run when Scala sources are staged. A docs-only commit doesn't need the
+# scalafmt round-trip.
+if ! git diff --cached --name-only --diff-filter=ACMR | grep -qE '\.scala$'; then
+  exit 0
+fi
+
+if [[ ! -x ./mill ]]; then
+  echo "pre-commit: ./mill not found in repo root — skipping scalafmt check" >&2
+  exit 0
+fi
+
+echo "pre-commit: running scalafmt check on all sources…"
+if ! ./mill mill.scalalib.scalafmt.ScalafmtModule/checkFormatAll __.sources; then
+  cat >&2 <<'MSG'
+
+pre-commit: scalafmt found formatting issues.
+
+Fix locally with:
+  ./mill mill.scalalib.scalafmt.ScalafmtModule/reformatAll __.sources
+  git add -u
+
+If you genuinely need to bypass this gate (rare — CI will reject it),
+re-run with: git commit --no-verify
+MSG
+  exit 1
+fi

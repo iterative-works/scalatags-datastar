@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# PURPOSE: Block pushes that would fail CI's scalafix gate (and the implicit compile gate).
+# PURPOSE: Runs ./mill __.fix --check; matches the scalafix step in .github/workflows/ci.yml.
+
+set -euo pipefail
+
+# Skip on branch-deletion pushes (no commits to validate). git supplies
+# <local-ref> <local-oid> <remote-ref> <remote-oid> on stdin per ref; a deletion
+# sends a zero local-oid.
+zero=$(git hash-object --stdin </dev/null 2>/dev/null || echo "0000000000000000000000000000000000000000")
+any_real_push=false
+while read -r _local_ref local_oid _remote_ref _remote_oid; do
+  if [[ "$local_oid" != "$zero" && "$local_oid" != "0000000000000000000000000000000000000000" ]]; then
+    any_real_push=true
+    break
+  fi
+done
+
+if [[ "$any_real_push" != "true" ]]; then
+  exit 0
+fi
+
+if [[ ! -x ./mill ]]; then
+  echo "pre-push: ./mill not found in repo root — skipping scalafix check" >&2
+  exit 0
+fi
+
+# scalafix --check also requires the project to compile (SemanticDB), so this step
+# catches compile errors as a side effect — and under -Werror that means a
+# warning-free build, not merely one that parses.
+echo "pre-push: running scalafix --check on all modules…"
+if ! ./mill __.fix --check; then
+  cat >&2 <<'MSG'
+
+pre-push: scalafix --check failed.
+
+Apply the rewrites locally with:
+  ./mill __.fix
+  git add -u && git commit --amend --no-edit  # or a new commit
+
+If the failure is a compile error rather than a lint rewrite, fix the
+underlying issue first (scalafix builds SemanticDB, which requires a clean
+compile — and under -Werror, a warning-free one).
+
+To bypass (rare — CI will reject): git push --no-verify
+MSG
+  exit 1
+fi
