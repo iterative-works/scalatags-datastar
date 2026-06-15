@@ -1,0 +1,99 @@
+# scalatags-datastar
+
+> Scalatags bindings for the [Datastar](https://data-star.dev) hypermedia framework that go beyond
+> plain bindings to **fully statically-typed templates**: signal references, the expression language,
+> and the backend endpoint URLs referenced by `@get`/`@post`/… are all checked by the Scala 3
+> compiler. Backend endpoints are [Tapir](https://tapir.softwaremill.com) endpoints, so a template can
+> only reference a route that actually exists, and its URL is reverse-routed from the endpoint — they
+> cannot drift.
+
+The library types the three magic-string kinds Datastar drives reactivity from — `data-*` attributes,
+signal/expression strings, and action URLs — and speaks Datastar's SSE wire protocol back from the
+server with the *same* Scalatags fragments and the *same* signal case class. The binding layer
+cross-compiles to JVM and Scala.js; the SSE codec and the server bridge are JVM-only. Datastar **Pro**
+attributes are not yet bound.
+
+groupId `works.iterative`, Scala 3.3.8 (LTS), built with Mill. Pre-release — not yet on Maven Central;
+build from source.
+
+## Imports
+
+A template author reaches the whole surface through three library wildcards plus the Scalatags peer:
+
+- `import scalatags.Text.all.*` — Scalatags tags/attributes (platform peer; always required).
+- `import works.iterative.scalatags.datastar.Datastar.*` — the core DSL: the `data-*` builders, the
+  `Expr` expression DSL (`lit` and the operators), the `Signal`/`Signals` model, and `ActionOptions`.
+  Do **not** also import `Expr.*` — two equal wildcards make `lit` ambiguous; this one star is enough.
+- `import works.iterative.scalatags.datastar.tapir.*` — the `endpoint.action` extension that
+  reverse-routes a Tapir endpoint to a Datastar action. Cross-compiled (JVM + JS).
+- `import works.iterative.scalatags.datastar.tapir.sse.*` — server side only: `SignalsInput`,
+  `datastarEvents`, `datastarStream`, and a re-export of the SSE codec (`ServerSentEvents`,
+  `ElementPatchMode`, `readSignals`).
+
+## The four typed surfaces
+
+- **Attributes** — the full standard `data-*` surface with a typed, chainable modifier builder; each
+  attribute exposes only the modifiers Datastar accepts, e.g.
+  `input(dataOn("input").debounce(300.millis).once := "@get('/search')")`.
+- **Signals + expressions** — the signal store is a **case class**, the single source of truth for its
+  shape and initial values:
+  ```scala
+  final case class Counter(count: Int = 0, step: Int = 1) derives Signals
+  object Counter extends Signals.Handles[Counter]:
+    val count = signal("count")   // Signal[Int]; signal("nope") would not compile
+  ```
+  `derives Signals` yields the initial `data-signals` JSON via `dataSignals := Counter()`; the
+  companion handles give field-checked typed references. `Expr[A]` operators render with JavaScript
+  precedence; equality is `===`/`!==` (Scala cannot override `==`); numeric operators are gated by
+  `Numeric`. `dataBind := Counter.step` renders the bare signal name (two-way).
+- **Backend actions** — `endpoint.action(input)` derives the verb and reverse-routes the URL from a
+  Tapir endpoint, so a template can only reference a route that exists:
+  `button(dataOn("click") := toggle.action(7L))` → `@post('/todos/7/toggle')`. Total — a methodless or
+  non-action endpoint falls back to `@get`, mirroring Tapir's own client interpreter. Action options
+  are typed via `ActionOptions` (`contentType`, `headers`); only the fields you set render.
+- **Server-side SSE** — `ServerSentEvents.patchElements(frag, selector, mode, useViewTransition,
+  namespace, …)` / `patchSignals(model)` render the exact Datastar wire format (validated against the
+  official SDK conformance suite); `readSignals[A](json)` decodes the round-tripped store into the
+  *same* case class that seeds it. On a Tapir/ZIO server, `SignalsInput.body[A]` / `.query[A]` decode
+  the inbound store in the codec layer (a misfit payload is a `400` before the handler runs),
+  `.out(datastarEvents)` declares the `text/event-stream`, and `datastarStream(events*)` (or its
+  `ZStream[String]` overload, for over-time feeds) builds the response byte stream.
+
+## Wire-format gotchas (verified against Datastar v1.0.2)
+
+These bit the examples gallery and are not obvious from the typed API:
+
+- **Two request channels, chosen by verb.** `@get`/`@delete` append the whole signal store as a
+  `?datastar=<json>` query parameter (with no signals it is the empty object `?datastar=%7B%7D`);
+  `@post`/`@put`/`@patch` send it as a JSON body. Decode with `SignalsInput.query[A]` for the former,
+  `SignalsInput.body[A]` for the latter.
+- **Checkbox group → array of booleans.** Every checkbox in the group shares the *bare* signal name
+  (`data-bind="selections"`, no index); the client collects them into a boolean array by DOM order.
+  `data-bind="selections[0]"` does **not** work — the client treats the whole string as one flat key,
+  so the array stays empty (request still 200, silently a no-op).
+- **File input → array of objects.** `<input type=file multiple data-bind="upload">` encodes each file
+  as `{name, contents, mime}`, where `contents` is raw base64 (no `data:…,` prefix). Model it as a
+  case class, not a `List[String]` of base64 (that fails to decode → 400).
+- **Pin the client to v1.0.2.** The `datastar-patch-elements`/`-signals` event names the codec targets
+  landed in the GitHub stable line; npm "latest"/beta still ships the old `merge-*` names. CDN:
+  `cdn.jsdelivr.net/gh/starfederation/datastar@v1.0.2/bundles/datastar.js`.
+
+## Modules
+
+- `datastar` (JVM + JS) — the core DSL: `data-*` attributes, the `Expr` DSL, the `Signals` model.
+  Depends only on Scalatags.
+- `tapir` (JVM + JS) — the `endpoint.action` reverse-routing bridge; compile-depends on core.
+- `sse` (JVM) — the native SSE codec and `readSignals`; Scalatags + zio-json, stack-neutral.
+- `tapirsse` (JVM) — the Tapir + SSE server bridge: the signal-store input codecs and the event-stream
+  output plus response-stream builder.
+- `scenarios` (JVM) — a runnable dogfood app reimplementing the
+  [data-star.dev/examples](https://data-star.dev/examples) gallery with these bindings (every example
+  but the Pro-only `match_media`), each demo shown beside the typed Scala that produces it.
+
+## Documentation
+
+- [README.md](README.md): full overview with worked examples for every layer and the runnable app.
+- [PLAN.md](PLAN.md): design, architecture decisions, roadmap, and verified Datastar reference notes.
+- Source: core DSL in `datastar/src`, the Tapir bridge in `tapir/src`, the SSE codec in `sse/src`, the
+  server bridge in `tapirsse/src`, the worked examples in `scenarios/src`.
+- GitHub: <https://github.com/iterative-works/scalatags-datastar>
