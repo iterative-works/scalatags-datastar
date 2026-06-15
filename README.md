@@ -247,6 +247,9 @@ Mill 1.1.2, Scala 3.3.8 (LTS).
 ./mill __.reformat             # format
 ```
 
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for formatting, linting, the `-Werror`
+compiler posture, coverage, CI, and the git hooks.
+
 ## License
 
 MIT.
