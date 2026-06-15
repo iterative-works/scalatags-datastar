@@ -2,12 +2,12 @@
 // PURPOSE: Every action renders the filtered list and the active count; add also clears the input.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.Stream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The TodoMVC example's handlers.
   *

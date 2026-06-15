@@ -2,13 +2,13 @@
 // PURPOSE: Reads/mutates the shared People repository; each action patches just the one row by id.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
-import scalatags.Text.all.Frag
 import org.http4s.HttpRoutes
+import scalatags.Text.all.Frag
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.Stream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The edit-row example's handlers.
   *

@@ -2,10 +2,10 @@
 // PURPOSE: The offset rides the `datastar` query param; the path itself carries no parameters.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The infinite-scroll example's route: [[moreRoute]] is what the sentinel reverse-routes, and
   * [[more]] is its server realisation reading the offset from the `datastar` query parameter.

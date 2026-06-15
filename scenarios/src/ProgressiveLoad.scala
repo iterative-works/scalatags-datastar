@@ -3,7 +3,8 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import works.iterative.scalatags.datastar.Signals
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 /** The progressive-load page's signal store — whether the Load button has been pressed. The button
   * sets it and binds its own `disabled` attribute to it, so a load runs only once.

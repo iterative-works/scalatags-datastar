@@ -25,7 +25,9 @@ object InlineValidationViewTest extends TestSuite:
         test("emailError covers the empty, malformed and already-registered cases"):
             assert(SignupValidation.emailError("").exists(_.contains("required")))
             assert(SignupValidation.emailError("nope").exists(_.contains("valid email")))
-            assert(SignupValidation.emailError("taken@example.com").exists(_.contains("registered")))
+            assert(
+                SignupValidation.emailError("taken@example.com").exists(_.contains("registered"))
+            )
             assert(SignupValidation.emailError("fresh@example.com").isEmpty)
 
         test("name fields are required and a complete form validates"):

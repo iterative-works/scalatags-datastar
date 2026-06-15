@@ -2,12 +2,12 @@
 // PURPOSE: A bounded feed paced by the requested fps; mutationRate gates which rows change.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.ZStream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The dbmon example's handler: a bounded feed that, each frame, randomly mutates a fraction of the
   * database rows (set by `mutationRate`) and patches the table, paced by the requested `fps`.

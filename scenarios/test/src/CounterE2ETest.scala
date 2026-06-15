@@ -2,10 +2,10 @@
 // PURPOSE: Proves the full round trip: typed action, readSignals decode, patch-signals response.
 package works.iterative.scalatags.datastar.scenarios
 
-import utest.*
-import zio.*
 import sttp.client3.*
+import utest.*
 import works.iterative.scalatags.datastar.sse.ServerSentEvents
+import zio.*
 
 object CounterE2ETest extends TestSuite:
 
@@ -30,6 +30,7 @@ object CounterE2ETest extends TestSuite:
                 finally backend.close()
             }
         }))
+    end withServer
 
     val tests = Tests:
 

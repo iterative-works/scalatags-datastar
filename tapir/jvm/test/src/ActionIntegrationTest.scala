@@ -2,10 +2,11 @@
 // PURPOSE: A template references an endpoint value and renders the verb + reverse-routed URL.
 package works.iterative.scalatags.datastar.tapir
 
-import utest.*
 import scalatags.Text.all.*
-import works.iterative.scalatags.datastar.Datastar.*
 import sttp.tapir.*
+import utest.*
+import works.iterative.scalatags.datastar.Datastar.*
+
 import scala.concurrent.duration.*
 
 object ActionIntegrationTest extends TestSuite:

@@ -3,8 +3,9 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import zio.*
-import scala.io.Source as ScalaSource
+
 import java.nio.charset.StandardCharsets.UTF_8
+import scala.io.Source as ScalaSource
 
 /** Turns a marked region of a source file into a clean snippet for display.
   *

@@ -2,9 +2,13 @@
 // PURPOSE: A payload that fits the store decodes to its value; one that does not is a decode error.
 package works.iterative.scalatags.datastar.tapir.sse
 
+import sttp.tapir.Codec
+import sttp.tapir.DecodeResult
+import sttp.tapir.EndpointIO
+import sttp.tapir.EndpointInput
 import utest.*
-import sttp.tapir.{Codec, DecodeResult, EndpointIO, EndpointInput}
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 /** A throwaway signal store: enough shape to exercise decoding — a typed field that rejects a
   * mismatched JSON value.

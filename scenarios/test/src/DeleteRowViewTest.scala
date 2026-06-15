@@ -14,10 +14,13 @@ object DeleteRowViewTest extends TestSuite:
             assert(html.contains("""data-init="@get('/delete-row/rows')""""))
 
         test("a row is keyed by id and guards a typed delete with confirm"):
-            val html = DeleteRowView.row(Member(3, "Fuqua Tarkenton", "f@example.com", false)).render
+            val html =
+                DeleteRowView.row(Member(3, "Fuqua Tarkenton", "f@example.com", false)).render
             assert(html.contains("""id="member-3""""))
             assert(html.contains("Fuqua Tarkenton"))
-            assert(html.contains("""confirm('Delete Fuqua Tarkenton?') &amp;&amp; @delete('/delete-row/3')"""))
+            assert(html.contains(
+                """confirm('Delete Fuqua Tarkenton?') &amp;&amp; @delete('/delete-row/3')"""
+            ))
 
         test("the repository is seeded with the roster"):
             assert(Members.seed.map(_.id) == Seq(1L, 2L, 3L, 4L, 5L))

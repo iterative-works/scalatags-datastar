@@ -9,7 +9,9 @@ object ProgressiveLoadViewTest extends TestSuite:
     val tests = Tests:
 
         test("the widget seeds the load-disabled signal store"):
-            assert(ProgressiveLoadView.demo.render.contains("""data-signals="{loadDisabled: false}""""))
+            assert(
+                ProgressiveLoadView.demo.render.contains("""data-signals="{loadDisabled: false}"""")
+            )
 
         test("the button sets the signal and fires the feed, and binds its own disabled state"):
             val html = ProgressiveLoadView.demo.render

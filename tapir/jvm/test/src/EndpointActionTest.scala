@@ -2,8 +2,8 @@
 // PURPOSE: Pins verb derivation (with GET fallback) and JS-string escaping of the embedded URL.
 package works.iterative.scalatags.datastar.tapir
 
-import utest.*
 import sttp.tapir.*
+import utest.*
 
 object EndpointActionTest extends TestSuite:
 

@@ -2,11 +2,11 @@
 // PURPOSE: Uses the ZIO Random service; patches the SVG with the svg namespace.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The svg-morphing example's handler: picks a random colour and radius and patches a fresh circle
   * in the SVG namespace.

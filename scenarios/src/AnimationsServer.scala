@@ -2,13 +2,13 @@
 // PURPOSE: Color throb and fade-out are paced ZStream feeds; view transitions toggles and re-patches.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
-import scalatags.Text.all.frag
 import org.http4s.HttpRoutes
+import scalatags.Text.all.frag
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.ZStream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The animations example's handlers, one per technique.
   *

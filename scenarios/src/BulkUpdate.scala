@@ -2,7 +2,8 @@
 // PURPOSE: A Repository[Long, Account] holds the table; the selections array rides the @put body.
 package works.iterative.scalatags.datastar.scenarios
 
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 // snippet: bulk-update-store
 /** An account in the bulk-update table. */

@@ -3,7 +3,8 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import works.iterative.scalatags.datastar.Signals
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 /** The infinite-scroll page's signal store: the offset of the next page, seeded to one page since
   * the initial render already shows the first.

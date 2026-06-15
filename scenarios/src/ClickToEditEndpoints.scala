@@ -2,10 +2,10 @@
 // PURPOSE: Save carries the profile signals in its body; the others read the server record.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The click-to-edit example's routes. [[viewRoute]] (also the data-init loader and the Cancel
   * target) and [[editRoute]] read the server record; [[saveRoute]] is a `@put` carrying the edited

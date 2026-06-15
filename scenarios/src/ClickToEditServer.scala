@@ -2,11 +2,11 @@
 // PURPOSE: Edit and reset also patch the signals, so the form's bound inputs reflect the record.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The click-to-edit example's handlers.
   *

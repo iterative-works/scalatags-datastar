@@ -2,10 +2,10 @@
 // PURPOSE: Covers content type, header key-quoting and value escaping, ordering, and the empty case.
 package works.iterative.scalatags.datastar.tapir
 
-import utest.*
 import scalatags.Text.all.*
-import works.iterative.scalatags.datastar.Datastar.*
 import sttp.tapir.*
+import utest.*
+import works.iterative.scalatags.datastar.Datastar.*
 
 object ActionOptionsTest extends TestSuite:
 

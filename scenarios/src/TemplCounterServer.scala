@@ -2,11 +2,11 @@
 // PURPOSE: Both handlers patch the count span; the Cell makes the increment atomic across visitors.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The templ-counter example's handlers: [[countLogic]] patches the current shared count;
   * [[incrementLogic]] advances it atomically and patches the new value.

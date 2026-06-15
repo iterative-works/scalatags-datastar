@@ -2,10 +2,10 @@
 // PURPOSE: The files ride the signal body, decoded into FileUpload by SignalsInput.body.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The file-upload example's route: [[submitRoute]] is what the Upload button reverse-routes, and
   * [[submit]] is its server realisation decoding the base64 files from the signal body.

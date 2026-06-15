@@ -2,8 +2,9 @@
 // PURPOSE: Pins the wire format (leading slash, path params, query encoding) found in the Phase 3 spike.
 package works.iterative.scalatags.datastar.tapir
 
-import utest.*
 import sttp.tapir.*
+import utest.*
+
 import EndpointUrl.urlOf
 
 object EndpointUrlTest extends TestSuite:

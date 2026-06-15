@@ -2,10 +2,10 @@
 // PURPOSE: Four routes the technique widgets reverse-route, each paired with its SSE server form.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The animations example's routes — one per technique. Each `*Route` is the empty-input route a
   * widget reverse-routes; each server form adds the SSE output (and, for view transitions, the

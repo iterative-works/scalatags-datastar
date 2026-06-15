@@ -2,8 +2,9 @@
 // PURPOSE: Confirms the expression DSL plugs into existing attributes without losing the string form.
 package works.iterative.scalatags.datastar
 
-import utest.*
 import scalatags.Text.all.*
+import utest.*
+
 import Datastar.*
 
 object TypedAttributesTest extends TestSuite:
@@ -24,8 +25,8 @@ object TypedAttributesTest extends TestSuite:
             // Datastar reads the attribute, so the expression it evaluates is unchanged.
             val visible = (count > lit(5)) && !busy
             assert(
-              render(dataShow := visible)
-                  == """<div data-show="$count &gt; 5 &amp;&amp; !$busy"></div>"""
+                render(dataShow := visible)
+                    == """<div data-show="$count &gt; 5 &amp;&amp; !$busy"></div>"""
             )
 
         test("an arithmetic expression binds inline"):
@@ -36,8 +37,8 @@ object TypedAttributesTest extends TestSuite:
             val b = Signal[Int]("b")
             assert(render(dataComputed := a + b) == """<div data-computed="$a + $b"></div>""")
             assert(
-              render(dataComputed("total") := a + b)
-                  == """<div data-computed:total="$a + $b"></div>"""
+                render(dataComputed("total") := a + b)
+                    == """<div data-computed:total="$a + $b"></div>"""
             )
 
         test("data-effect takes an expression"):
@@ -52,3 +53,4 @@ object TypedAttributesTest extends TestSuite:
             // attribute that takes an expression — so a handle must render its name, not `$step`.
             assert(render(dataBind := Counter.step) == """<div data-bind="step"></div>""")
             assert(input(dataBind := Counter.step).render == """<input data-bind="step" />""")
+end TypedAttributesTest

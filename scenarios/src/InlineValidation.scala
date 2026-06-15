@@ -3,7 +3,8 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import works.iterative.scalatags.datastar.Signals
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 /** The sign-up form's signal store — the three bound fields. One case class is the whole round
   * trip: `derives Signals` seeds `data-signals` and the JSON codecs let `readSignals` decode the

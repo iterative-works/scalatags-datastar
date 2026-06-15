@@ -3,6 +3,7 @@
 package works.iterative.scalatags.datastar
 
 import utest.*
+
 import Expr.*
 
 object ExprTest extends TestSuite:
@@ -58,3 +59,4 @@ object ExprTest extends TestSuite:
         test("string concatenation with +"):
             val msg = Signal[String]("msg")
             assert((msg + lit(" items")).render == "$msg + ' items'")
+end ExprTest

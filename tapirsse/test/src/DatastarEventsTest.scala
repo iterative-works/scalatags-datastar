@@ -4,7 +4,9 @@ package works.iterative.scalatags.datastar.tapir.sse
 
 import utest.*
 import zio.*
-import zio.stream.{Stream, ZStream}
+import zio.stream.Stream
+import zio.stream.ZStream
+
 import java.nio.charset.StandardCharsets.UTF_8
 
 object DatastarEventsTest extends TestSuite:

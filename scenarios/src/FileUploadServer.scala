@@ -2,11 +2,11 @@
 // PURPOSE: Reads the decoded base64 array; size is approximated from the encoded length.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The file-upload example's handler: takes the decoded base64 files and patches a report of the
   * count and approximate total size.

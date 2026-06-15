@@ -2,9 +2,12 @@
 // PURPOSE: The case class is the single source of truth for the store's shape and initial values.
 package works.iterative.scalatags.datastar
 
-import scala.deriving.Mirror
-import scala.compiletime.{constValue, constValueTuple, erasedValue, summonInline}
+import scala.compiletime.constValue
+import scala.compiletime.constValueTuple
+import scala.compiletime.erasedValue
 import scala.compiletime.ops.any.==
+import scala.compiletime.summonInline
+import scala.deriving.Mirror
 
 /** The initial-value model for a Datastar signal store.
   *

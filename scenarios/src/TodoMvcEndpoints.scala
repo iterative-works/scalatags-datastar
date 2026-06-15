@@ -2,10 +2,10 @@
 // PURPOSE: The view-state store rides the body (POST/PUT) or the datastar query (GET/DELETE).
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The TodoMVC example's routes. Each mutating action reverse-routes a distinct verb (add `@post`,
   * toggle/toggle-all/clear `@put`, delete `@delete`); the per-item routes carry the id as a typed

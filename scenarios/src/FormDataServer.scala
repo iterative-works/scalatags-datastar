@@ -2,11 +2,11 @@
 // PURPOSE: Proves the form channel: the handler reads decoded form fields, not the signal store.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The form-data example's handler: takes the decoded form fields and patches an echo of them, so
   * the page shows exactly what the form submitted over the form-encoded channel.

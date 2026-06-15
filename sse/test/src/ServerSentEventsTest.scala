@@ -2,9 +2,10 @@
 // PURPOSE: Covers the typed patchSignals/readSignals entry points and the namespace option.
 package works.iterative.scalatags.datastar.sse
 
+import scalatags.Text.all.*
 import utest.*
 import zio.json.*
-import scalatags.Text.all.*
+
 import scala.concurrent.duration.DurationInt
 
 /** A small signal model used to exercise the typed JSON entry points. */
@@ -21,12 +22,16 @@ object ServerSentEventsTest extends TestSuite:
 
         test("patchElements emits a namespace data line when set") {
             val sse = ServerSentEvents.patchElements(raw("<g/>"), namespace = Some("svg"))
-            assert(sse == "event: datastar-patch-elements\ndata: namespace svg\ndata: elements <g/>\n\n")
+            assert(
+                sse == "event: datastar-patch-elements\ndata: namespace svg\ndata: elements <g/>\n\n"
+            )
         }
 
         test("a non-default retry duration emits a retry line in milliseconds") {
             val sse = ServerSentEvents.patchElements(div(), retryDuration = 2.seconds)
-            assert(sse == "event: datastar-patch-elements\nretry: 2000\ndata: elements <div></div>\n\n")
+            assert(
+                sse == "event: datastar-patch-elements\nretry: 2000\ndata: elements <div></div>\n\n"
+            )
         }
 
         test("patchSignals serializes a typed model to compact JSON") {

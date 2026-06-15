@@ -4,8 +4,10 @@ package works.iterative.scalatags.datastar.sse
 
 import scalatags.Text.Frag
 import scalatags.Text.all.raw
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import zio.json.*
+
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.duration.FiniteDuration
 
 /** The Datastar Server-Sent Events a backend streams to the browser.
   *

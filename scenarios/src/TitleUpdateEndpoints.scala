@@ -2,10 +2,10 @@
 // PURPOSE: No signals are read; the page carries none, so the route models no input.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The title-update example's route: [[updateRoute]] is what the button's `@post(...)` action
   * reverse-routes, and [[update]] is its server realisation streaming the title patch.

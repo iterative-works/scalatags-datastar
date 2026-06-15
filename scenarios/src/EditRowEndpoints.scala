@@ -2,10 +2,10 @@
 // PURPOSE: The id is a typed Long path parameter; Save reads the edited fields from a form body.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The edit-row example's routes: load the table, enter edit mode for one row, cancel back to the
   * read view, and save the edited fields. The id is a typed `Long` path parameter throughout;

@@ -2,8 +2,8 @@
 // PURPOSE: `/examples/{id}` carries the demo slug; an unknown slug is a 404, like any missing page.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.model.StatusCode
+import sttp.tapir.*
 
 /** The gallery's page routes.
   *

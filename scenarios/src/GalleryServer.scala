@@ -2,8 +2,8 @@
 // PURPOSE: The one file-reading edge: loads each demo's snippet regions from the classpath to show.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
 import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import zio.*
 
 /** The gallery's page handlers.

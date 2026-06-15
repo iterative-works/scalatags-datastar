@@ -2,10 +2,10 @@
 // PURPOSE: A GET action carries the signal store in the `datastar` query param, not a request body.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The active-search example's action route.
   *

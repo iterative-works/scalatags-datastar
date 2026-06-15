@@ -2,11 +2,11 @@
 // PURPOSE: Decodes the round-tripped store, advances it, and answers with a codec-built event.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The counter example's action handler, wired to the house server stack.
   *

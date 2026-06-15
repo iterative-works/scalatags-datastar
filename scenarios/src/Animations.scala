@@ -3,7 +3,8 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import works.iterative.scalatags.datastar.Signals
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 /** The view-transitions technique's signal store: which of the two panel states is shown. The
   * client carries it, the server reads it from the `datastar` query parameter, returns the other

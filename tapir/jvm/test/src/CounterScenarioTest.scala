@@ -2,12 +2,13 @@
 // PURPOSE: Renders the canonical counter view and pins its exact HTML across every Phase 2/3 feature.
 package works.iterative.scalatags.datastar.tapir
 
-import utest.*
 import scalatags.Text.all.*
-import works.iterative.scalatags.datastar.Datastar.*
 import sttp.tapir.*
+import utest.*
+import works.iterative.scalatags.datastar.Datastar.*
 
-/** The signal store for the counter, the single source of truth for its shape and initial values. */
+/** The signal store for the counter, the single source of truth for its shape and initial values.
+  */
 final case class Counter(count: Int = 0, step: Int = 1) derives Signals
 object Counter extends Signals.Handles[Counter]:
     val count = signal("count")
@@ -22,10 +23,10 @@ object CounterScenarioTest extends TestSuite:
             val inc = increment.action
 
             val view = div(
-              dataSignals := Signals.encode(Counter()),
-              input(`type` := "number", dataBind := Counter.step),
-              button(dataOn("click") := inc)("+"),
-              span(dataShow := Counter.count > lit(0), dataText := Counter.count)
+                dataSignals := Signals.encode(Counter()),
+                input(`type` := "number", dataBind := Counter.step),
+                button(dataOn("click") := inc)("+"),
+                span(dataShow := Counter.count > lit(0), dataText := Counter.count)
             )
 
             val expected =
@@ -36,3 +37,4 @@ object CounterScenarioTest extends TestSuite:
                     """</div>"""
 
             assert(view.render == expected)
+end CounterScenarioTest

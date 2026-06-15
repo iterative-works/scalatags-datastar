@@ -2,7 +2,8 @@
 // PURPOSE: A data-bind file input encodes each chosen file as {name, contents, mime} in the body.
 package works.iterative.scalatags.datastar.scenarios
 
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 /** The file-upload page's signal store: the selected files. When a bound file input changes,
   * Datastar encodes each file as an object — its `name`, base64 `contents`, and `mime` type — and

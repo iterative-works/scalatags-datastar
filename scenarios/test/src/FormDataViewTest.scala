@@ -18,7 +18,8 @@ object FormDataViewTest extends TestSuite:
 
         test("formResult shows a placeholder when empty and echoes the fields otherwise"):
             assert(FormDataView.formResult(Seq.empty).render.contains("Submit the form"))
-            val html = FormDataView.formResult(Seq("name" -> "Pizza", "toppings" -> "cheese")).render
+            val html =
+                FormDataView.formResult(Seq("name" -> "Pizza", "toppings" -> "cheese")).render
             assert(html.contains("""id="form-result""""))
             assert(html.contains("name = Pizza"))
             assert(html.contains("toppings = cheese"))

@@ -16,7 +16,8 @@ object BulkUpdateViewTest extends TestSuite:
             assert(html.contains("""data-init="@get('/bulk-update/rows')""""))
 
         test("a row binds its checkbox into the shared selections array"):
-            val html = BulkUpdateView.row(Account(1, "Joe", "joe@example.com", active = false)).render
+            val html =
+                BulkUpdateView.row(Account(1, "Joe", "joe@example.com", active = false)).render
             assert(html.contains("""id="account-1""""))
             assert(html.contains("""data-bind:selections="""""))
             assert(html.contains("Inactive"))

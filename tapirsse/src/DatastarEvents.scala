@@ -2,10 +2,14 @@
 // PURPOSE: `.out(datastarEvents)` declares the text/event-stream; `datastarStream` carries its bytes.
 package works.iterative.scalatags.datastar.tapir.sse
 
-import sttp.tapir.{streamTextBody, CodecFormat, StreamBodyIO}
 import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.CodecFormat
+import sttp.tapir.StreamBodyIO
+import sttp.tapir.streamTextBody
 import zio.Chunk
-import zio.stream.{Stream, ZStream}
+import zio.stream.Stream
+import zio.stream.ZStream
+
 import java.nio.charset.StandardCharsets.UTF_8
 
 /** The `text/event-stream` output a Datastar SSE endpoint declares, as a `ZioStreams` byte stream.

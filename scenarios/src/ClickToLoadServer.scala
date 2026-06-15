@@ -2,11 +2,11 @@
 // PURPOSE: Three events: append the rows, re-render the button, patch the offset signal forward.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The click-to-load example's handler: reads the offset from the store, appends that page's rows
   * into the table, re-renders the Load-more control, and patches the offset forward so the next

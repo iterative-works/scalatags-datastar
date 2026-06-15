@@ -2,12 +2,12 @@
 // PURPOSE: Shuffles with the ZIO Random service, then paces each section patch over the feed.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.ZStream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The progressive-load example's handler: shuffles the sections, then streams one paced
   * `patch-elements` event per section, each filling its placeholder by id.

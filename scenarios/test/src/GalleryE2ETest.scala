@@ -2,10 +2,10 @@
 // PURPOSE: Proves the home index, an example page with classpath-read source, and a 404 for unknown.
 package works.iterative.scalatags.datastar.scenarios
 
-import utest.*
-import zio.*
 import sttp.client3.*
 import sttp.model.Uri
+import utest.*
+import zio.*
 
 object GalleryE2ETest extends TestSuite:
 
@@ -30,6 +30,7 @@ object GalleryE2ETest extends TestSuite:
                 finally backend.close()
             }
         }))
+    end withServer
 
     private def fetch(backend: SttpBackend[Identity, Any], uri: Uri) =
         basicRequest.get(uri).response(asStringAlways).send(backend)
@@ -52,7 +53,9 @@ object GalleryE2ETest extends TestSuite:
                 assert(response.body.contains("""class="language-scala""""))
                 // The source is loaded from the classpath, so the real file's text is on the page.
                 assert(response.body.contains("final case class Counter"))
-                assert(response.body.contains(s"highlightjs/cdn-release@${Gallery.highlightVersion}"))
+                assert(
+                    response.body.contains(s"highlightjs/cdn-release@${Gallery.highlightVersion}")
+                )
 
         test("GET /examples/{unknown} returns 404"):
             withServer: (port, backend) =>

@@ -3,9 +3,10 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import scalatags.Text.all.*
-import scala.concurrent.duration.DurationInt
 import works.iterative.scalatags.datastar.Datastar.*
 import works.iterative.scalatags.datastar.tapir.*
+
+import scala.concurrent.duration.DurationInt
 
 /** The active-search example's live fragment.
   *

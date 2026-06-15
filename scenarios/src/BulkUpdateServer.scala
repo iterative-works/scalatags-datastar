@@ -2,12 +2,12 @@
 // PURPOSE: Maps the selection array to row ids in render order, updates the store, re-renders.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.Stream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The bulk-update example's handlers.
   *

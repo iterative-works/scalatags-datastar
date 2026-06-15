@@ -2,9 +2,9 @@
 // PURPOSE: One place defines the union, so the entrypoint and its tests route through the same set.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import zio.*
 
 /** All scenario examples, mounted together.

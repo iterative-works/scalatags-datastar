@@ -2,8 +2,9 @@
 // PURPOSE: Covers scalar fields, string quoting, nested models, and binding a model to dataSignals.
 package works.iterative.scalatags.datastar
 
-import utest.*
 import scalatags.Text.all.*
+import utest.*
+
 import Datastar.*
 
 final case class Counter(count: Int = 0, step: Int = 1) derives Signals
@@ -32,18 +33,18 @@ object SignalsTest extends TestSuite:
 
         test("dataSignals binds a model's encoded initial literal"):
             assert(
-              div(dataSignals := Signals.encode(Counter())).render
-                  == """<div data-signals="{count: 0, step: 1}"></div>"""
+                div(dataSignals := Signals.encode(Counter())).render
+                    == """<div data-signals="{count: 0, step: 1}"></div>"""
             )
 
         test("dataSignals binds a typed model directly, no encode call"):
             assert(
-              div(dataSignals := Counter()).render
-                  == """<div data-signals="{count: 0, step: 1}"></div>"""
+                div(dataSignals := Counter()).render
+                    == """<div data-signals="{count: 0, step: 1}"></div>"""
             )
             assert(
-              div(dataSignals := Search("milk", 3)).render
-                  == """<div data-signals="{query: 'milk', page: 3}"></div>"""
+                div(dataSignals := Search("milk", 3)).render
+                    == """<div data-signals="{query: 'milk', page: 3}"></div>"""
             )
 
         test("companion handles render as signal references"):
@@ -60,3 +61,4 @@ object SignalsTest extends TestSuite:
         test("a name that is not a field of the model does not compile"):
             assert(!compiletime.testing.typeChecks("""Counter.signal("nope")"""))
             assert(compiletime.testing.typeChecks("""Counter.signal("count")"""))
+end SignalsTest

@@ -2,10 +2,10 @@
 // PURPOSE: No signal store; the route only fetches a fragment, so it has an empty typed input.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The lazy-load example's route. The page has no signals, so the route models no input at all;
   * [[graphRoute]] is what the template's `data-init` action reverse-routes, and [[graph]] is its

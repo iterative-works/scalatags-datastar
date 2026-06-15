@@ -2,8 +2,8 @@
 // PURPOSE: The verb is derived from the endpoint method, so the action cannot drift from the route.
 package works.iterative.scalatags.datastar.tapir
 
-import sttp.tapir.PublicEndpoint
 import sttp.model.Method
+import sttp.tapir.PublicEndpoint
 import works.iterative.scalatags.datastar.ActionOptions
 
 /** A Datastar backend action from a typed endpoint, as the `endpoint.action` extension.

@@ -2,10 +2,10 @@
 // PURPOSE: The selection array rides the @put body, decoded into BulkSelection by SignalsInput.body.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The bulk-update example's routes: load the table, and activate or deactivate the selected rows.
   * The two bulk actions are `@put`s whose body carries the selection signal store.

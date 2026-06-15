@@ -2,10 +2,10 @@
 // PURPOSE: No signal store; the count lives entirely on the server.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The templ-counter example's routes: [[countRoute]] (the data-init loader) reads the shared
   * count, [[incrementRoute]] advances it.

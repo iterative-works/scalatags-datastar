@@ -2,12 +2,12 @@
 // PURPOSE: One place builds the routes and the scoped server; each example just supplies endpoints.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.tapir.server.http4s.ztapir.ZHttp4sServerInterpreter
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.implicits.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.server.http4s.ztapir.ZHttp4sServerInterpreter
+import sttp.tapir.ztapir.*
 import zio.*
 import zio.interop.catz.*
 

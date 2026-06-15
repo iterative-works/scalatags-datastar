@@ -2,13 +2,13 @@
 // PURPOSE: Isolates the Tapir→http4s interpretation and the streaming SSE body from the network.
 package works.iterative.scalatags.datastar.scenarios
 
+import org.http4s.*
+import org.http4s.headers.`Content-Type`
+import org.http4s.implicits.*
 import utest.*
+import works.iterative.scalatags.datastar.sse.ServerSentEvents
 import zio.*
 import zio.interop.catz.*
-import org.http4s.*
-import org.http4s.implicits.*
-import org.http4s.headers.`Content-Type`
-import works.iterative.scalatags.datastar.sse.ServerSentEvents
 
 object CounterRoutesTest extends TestSuite:
 

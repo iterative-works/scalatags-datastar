@@ -3,7 +3,8 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import works.iterative.scalatags.datastar.Signals
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 // snippet: dbmon-store
 /** The dbmon controls: how often the table updates (frames per second) and what fraction of rows

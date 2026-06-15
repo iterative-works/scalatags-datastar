@@ -2,11 +2,11 @@
 // PURPOSE: Three events: append the rows, patch a fresh sentinel, advance the offset signal.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The infinite-scroll example's handler: reads the offset from the store, appends that page's
   * rows, patches a fresh sentinel (re-armed while rows remain, inert at the end), and advances the

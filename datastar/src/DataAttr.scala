@@ -3,7 +3,9 @@
 package works.iterative.scalatags.datastar
 
 import scalatags.generic
-import scala.concurrent.duration.{FiniteDuration, SECONDS}
+
+import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.SECONDS
 
 /** A Datastar attribute under construction: a base `data-*` name (already including any colon key)
   * plus the modifiers appended so far. Modifiers render as `__name` suffixes with `.`-separated

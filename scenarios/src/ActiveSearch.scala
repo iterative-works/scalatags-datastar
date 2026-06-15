@@ -3,7 +3,8 @@
 package works.iterative.scalatags.datastar.scenarios
 
 import works.iterative.scalatags.datastar.Signals
-import zio.json.{JsonDecoder, JsonEncoder}
+import zio.json.JsonDecoder
+import zio.json.JsonEncoder
 
 /** The active-search page's signal store — the bound query text. As with the live-search example,
   * one case class is the whole round trip: `derives Signals` seeds `data-signals`, and the JSON

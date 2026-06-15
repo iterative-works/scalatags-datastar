@@ -2,13 +2,13 @@
 // PURPOSE: A valid store reaches the handler already typed; a malformed one is a 400, handler unrun.
 package works.iterative.scalatags.datastar.scenarios
 
-import utest.*
-import zio.*
-import zio.interop.catz.*
 import org.http4s.*
 import org.http4s.implicits.*
 import sttp.tapir.ztapir.*
+import utest.*
 import works.iterative.scalatags.datastar.tapir.sse.SignalsInput
+import zio.*
+import zio.interop.catz.*
 
 object SignalsInputTest extends TestSuite:
 
@@ -57,7 +57,10 @@ object SignalsInputTest extends TestSuite:
 
         test("query decodes the datastar parameter into the typed store"):
             val (response, body) = call(
-                Request[F](Method.GET, uri"/query".withQueryParam("datastar", """{"search":"go"}"""))
+                Request[F](
+                    Method.GET,
+                    uri"/query".withQueryParam("datastar", """{"search":"go"}""")
+                )
             )
             assert(response.status.code == 200)
             assert(body == ActiveSearch("go").toString)

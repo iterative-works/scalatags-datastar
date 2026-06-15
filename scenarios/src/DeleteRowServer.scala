@@ -2,12 +2,12 @@
 // PURPOSE: Reads/mutates the shared Members repository; the delete patches the row out by id.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
-import scalatags.Text.all.frag
 import org.http4s.HttpRoutes
-import zio.*
+import scalatags.Text.all.frag
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The delete-row example's handlers.
   *

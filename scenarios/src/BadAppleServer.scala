@@ -2,12 +2,12 @@
 // PURPOSE: Uses the over-time datastarStream feed; the loop is bounded so it ends on its own.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.ZStream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The bad-apple example's handler: streams the frame loop a few times over, one paced
   * `patch-elements` event per frame, then stops.

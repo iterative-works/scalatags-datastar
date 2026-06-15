@@ -3,8 +3,8 @@
 package works.iterative.scalatags.datastar.sse
 
 import utest.*
-import zio.json.*
 import works.iterative.scalatags.datastar.Signals
+import zio.json.*
 
 /** A signal store that is the single source of truth in both directions: `derives Signals` seeds
   * the initial `data-signals` value (core), and `derives JsonDecoder` decodes the store Datastar
@@ -25,7 +25,9 @@ object SymmetryTest extends TestSuite:
 
         test("patchSignals streams the model back as a patch-signals event") {
             val sse = ServerSentEvents.patchSignals(Counter(7, 3))
-            assert(sse == "event: datastar-patch-signals\ndata: signals {\"count\":7,\"step\":3}\n\n")
+            assert(
+                sse == "event: datastar-patch-signals\ndata: signals {\"count\":7,\"step\":3}\n\n"
+            )
         }
     }
 

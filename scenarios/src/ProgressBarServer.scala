@@ -2,12 +2,12 @@
 // PURPOSE: Uses the over-time datastarStream feed: one paced patch-elements event per step.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
+import works.iterative.scalatags.datastar.tapir.sse.*
 import zio.*
 import zio.stream.ZStream
-import works.iterative.scalatags.datastar.tapir.sse.*
 
 /** The progress-bar example's handler: streams a `patch-elements` event for each percentage step,
   * paced by a short delay, then one final event swapping in the "try again" button.

@@ -2,10 +2,10 @@
 // PURPOSE: The member id is a typed Long path parameter; @delete reverse-routes from the same route.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The delete-row example's routes.
   *

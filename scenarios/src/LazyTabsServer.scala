@@ -2,11 +2,11 @@
 // PURPOSE: A 404-free demo: an out-of-range index falls back to the first tab rather than failing.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.ztapir.*
-import sttp.capabilities.zio.ZioStreams
 import org.http4s.HttpRoutes
-import zio.*
+import sttp.capabilities.zio.ZioStreams
+import sttp.tapir.ztapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.*
 
 /** The lazy-tabs example's handler: takes the tab index from the URL and streams the whole widget
   * with that tab selected, so the new `aria-selected` state and panel content arrive together.

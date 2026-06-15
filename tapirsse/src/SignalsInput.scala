@@ -2,10 +2,13 @@
 // PURPOSE: Decoding lives in the codec, so a payload that does not fit the store is a 400, not a match.
 package works.iterative.scalatags.datastar.tapir.sse
 
-import sttp.tapir.{stringJsonBody, DecodeResult, EndpointIO, EndpointInput}
+import sttp.tapir.DecodeResult
+import sttp.tapir.EndpointIO
+import sttp.tapir.EndpointInput
 import sttp.tapir.query as datastarQuery
-import zio.json.*
+import sttp.tapir.stringJsonBody
 import works.iterative.scalatags.datastar.sse.readSignals
+import zio.json.*
 
 /** Tapir inputs that carry Datastar's round-tripped signal store, decoded into the typed model `A`.
   *

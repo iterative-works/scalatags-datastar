@@ -2,10 +2,10 @@
 // PURPOSE: The tab index is an explicit URL parameter (the other channel), never the signal store.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The lazy-tabs example's route.
   *

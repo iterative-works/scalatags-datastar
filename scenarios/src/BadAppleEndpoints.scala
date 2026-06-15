@@ -2,10 +2,10 @@
 // PURPOSE: One-way: no signal store; the route only opens the event-stream.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The bad-apple example's route: [[playRoute]] is what data-init reverse-routes, [[play]] its
   * server realisation streaming the frames.

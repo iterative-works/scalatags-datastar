@@ -2,13 +2,16 @@
 // PURPOSE: Compares output the way the upstream Go runner does — by event fields and data subgroups.
 package works.iterative.scalatags.datastar.sse
 
+import scalatags.Text.all.raw
 import utest.*
 import zio.json.*
 import zio.json.ast.Json
-import scalatags.Text.all.raw
+
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import scala.concurrent.duration.DurationInt
 import scala.jdk.CollectionConverters.*
-import java.nio.file.{Files, Path, Paths}
 
 /** Drives [[ServerSentEvents]] with every vendored golden case and checks the output against the
   * expected SSE, replicating the upstream runner's comparison: events are matched in order,
@@ -63,13 +66,16 @@ object ConformanceTest extends TestSuite:
     end renderInput
 
     private def renderEvent(ev: InputEvent): String =
-        val retry = ev.retryDuration.map(_.millis).getOrElse(ServerSentEvents.DefaultSseRetryDuration)
+        val retry =
+            ev.retryDuration.map(_.millis).getOrElse(ServerSentEvents.DefaultSseRetryDuration)
         ev.tpe match
             case "patchElements" =>
                 ServerSentEvents.patchElements(
                     raw(ev.elements.getOrElse("")),
                     selector = ev.selector,
-                    mode = ev.mode.flatMap(ElementPatchMode.fromValue).getOrElse(ElementPatchMode.Outer),
+                    mode = ev.mode.flatMap(ElementPatchMode.fromValue).getOrElse(
+                        ElementPatchMode.Outer
+                    ),
                     useViewTransition = ev.useViewTransition.getOrElse(false),
                     namespace = ev.namespace,
                     eventId = ev.eventId,
@@ -92,6 +98,7 @@ object ConformanceTest extends TestSuite:
                     retryDuration = retry
                 )
             case other => sys.error(s"unknown event type: $other")
+        end match
     end renderEvent
 
     private def attributesOf(json: Option[Json]): Seq[(String, String)] = json match
@@ -125,7 +132,11 @@ object ConformanceTest extends TestSuite:
         if current.nonEmpty then events :+ SseEvent(current) else events
     end parseSse
 
-    private def compareEvents(name: String, expected: List[SseEvent], actual: List[SseEvent]): List[String] =
+    private def compareEvents(
+        name: String,
+        expected: List[SseEvent],
+        actual: List[SseEvent]
+    ): List[String] =
         if expected.length != actual.length then
             List(s"$name: expected ${expected.length} event(s), got ${actual.length}")
         else
@@ -159,7 +170,10 @@ object ConformanceTest extends TestSuite:
 
     private def listCaseDirs(dir: Path): List[Path] =
         val stream = Files.list(dir)
-        try stream.iterator().asScala.filter(Files.isDirectory(_)).toList.sortBy(_.getFileName.toString)
+        try stream.iterator().asScala.filter(Files.isDirectory(_)).toList.sortBy(
+                _.getFileName.toString
+            )
         finally stream.close()
+    end listCaseDirs
 
 end ConformanceTest

@@ -2,10 +2,10 @@
 // PURPOSE: The signal store rides the `datastar` query param (faithful two-channel), though unused.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The progressive-load example's route: [[updatesRoute]] is what the Load button reverse-routes,
   * and [[updates]] is its server realisation streaming the sections.

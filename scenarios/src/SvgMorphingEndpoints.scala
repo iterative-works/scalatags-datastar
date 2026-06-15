@@ -2,10 +2,10 @@
 // PURPOSE: Stateless: each morph is independent, so no signal store and no server state.
 package works.iterative.scalatags.datastar.scenarios
 
-import sttp.tapir.*
 import sttp.capabilities.zio.ZioStreams
-import zio.stream.Stream
+import sttp.tapir.*
 import works.iterative.scalatags.datastar.tapir.sse.*
+import zio.stream.Stream
 
 /** The svg-morphing example's route: [[morphRoute]] is what the button reverse-routes, and
   * [[morph]] is its server realisation streaming the new circle.
